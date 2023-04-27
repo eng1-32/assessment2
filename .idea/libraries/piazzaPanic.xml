@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="piazzaPanic">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/piazzaPanic.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
