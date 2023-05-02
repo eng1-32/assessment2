@@ -1,0 +1,169 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > SavableStation</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic.utility.saving</a>
+</div>
+
+<h1>Coverage Summary for Class: SavableStation (com.devcharles.piazzapanic.utility.saving)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">SavableStation</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (25/25)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.devcharles.piazzapanic.utility.saving;
+&nbsp;
+&nbsp;import com.devcharles.piazzapanic.components.FoodComponent.FoodType;
+&nbsp;import com.devcharles.piazzapanic.components.StationComponent;
+&nbsp;import com.devcharles.piazzapanic.utility.EntityFactory;
+&nbsp;import com.devcharles.piazzapanic.utility.Station.StationType;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;
+&nbsp;/**
+&nbsp; * @author Alistair Foggin
+&nbsp; */
+<b class="fc">&nbsp;public class SavableStation {</b>
+&nbsp;
+&nbsp;  int id;
+&nbsp;  StationType type;
+<b class="fc">&nbsp;  ArrayList&lt;SavableFood&gt; food = new ArrayList&lt;&gt;(</b>
+<b class="fc">&nbsp;      Arrays.asList(new SavableFood[]{null, null, null, null}));</b>
+&nbsp;  FoodType ingredient;
+<b class="fc">&nbsp;  public float prepModifier = 1f;</b>
+<b class="fc">&nbsp;  public float chopModifier = 1f;</b>
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Copy values from the station component so that it does not need any entities
+&nbsp;   *
+&nbsp;   * @param station the station component to copy values from
+&nbsp;   * @return the serializable station
+&nbsp;   */
+&nbsp;  public static SavableStation from(StationComponent station) {
+<b class="fc">&nbsp;    SavableStation savableStation = new SavableStation();</b>
+<b class="fc">&nbsp;    savableStation.id = station.id;</b>
+<b class="fc">&nbsp;    savableStation.type = station.type;</b>
+<b class="fc">&nbsp;    for (int i = 0; i &lt; savableStation.food.size(); i++) {</b>
+<b class="fc">&nbsp;      savableStation.food.set(i, SavableFood.from(station.food.get(i)));</b>
+&nbsp;    }
+<b class="fc">&nbsp;    savableStation.ingredient = station.ingredient;</b>
+<b class="fc">&nbsp;    savableStation.prepModifier = station.prepModifier;</b>
+<b class="fc">&nbsp;    savableStation.chopModifier = station.chopModifier;</b>
+<b class="fc">&nbsp;    return savableStation;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Copy values back into a station component
+&nbsp;   *
+&nbsp;   * @param factory the factory to create the template for the food entities on the station
+&nbsp;   * @return the station component to be used in the engine
+&nbsp;   */
+&nbsp;  public StationComponent toStationComponent(EntityFactory factory) {
+<b class="fc">&nbsp;    StationComponent stationComponent = new StationComponent();</b>
+<b class="fc">&nbsp;    stationComponent.id = id;</b>
+<b class="fc">&nbsp;    stationComponent.interactingCook = null;</b>
+<b class="fc">&nbsp;    stationComponent.type = type;</b>
+&nbsp;
+<b class="fc">&nbsp;    for (int i = 0; i &lt; food.size(); i++) {</b>
+<b class="fc">&nbsp;      if (food.get(i) != null) {</b>
+<b class="fc">&nbsp;        stationComponent.food.set(i, food.get(i).toEntity(factory));</b>
+&nbsp;      }
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    stationComponent.ingredient = ingredient;</b>
+<b class="fc">&nbsp;    stationComponent.prepModifier = prepModifier;</b>
+<b class="fc">&nbsp;    stationComponent.chopModifier = chopModifier;</b>
+&nbsp;
+<b class="fc">&nbsp;    return stationComponent;</b>
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>

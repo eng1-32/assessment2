@@ -1,0 +1,554 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CustomerAISystem</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic.componentsystems</a>
+</div>
+
+<h1>Coverage Summary for Class: CustomerAISystem (com.devcharles.piazzapanic.componentsystems)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CustomerAISystem</td>
+<td class="coverageStat">
+  <span class="percent">
+    90.5%
+  </span>
+  <span class="absValue">
+    (19/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    89%
+  </span>
+  <span class="absValue">
+    (154/173)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">CustomerAISystem$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    37.5%
+  </span>
+  <span class="absValue">
+    (6/16)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    91.3%
+  </span>
+  <span class="absValue">
+    (21/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    84.7%
+  </span>
+  <span class="absValue">
+    (160/189)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.devcharles.piazzapanic.componentsystems;
+&nbsp;
+&nbsp;import com.badlogic.gdx.math.MathUtils;
+&nbsp;import com.devcharles.piazzapanic.utility.Difficulty;
+&nbsp;import com.devcharles.piazzapanic.utility.saving.SavableCustomer;
+&nbsp;import com.devcharles.piazzapanic.utility.saving.SavableCustomerAISystem;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;import com.badlogic.ashley.core.Engine;
+&nbsp;import com.badlogic.ashley.core.Entity;
+&nbsp;import com.badlogic.ashley.core.Family;
+&nbsp;import com.badlogic.ashley.systems.IteratingSystem;
+&nbsp;import com.badlogic.gdx.Gdx;
+&nbsp;import com.badlogic.gdx.ai.steer.Proximity;
+&nbsp;import com.badlogic.gdx.ai.steer.behaviors.Arrive;
+&nbsp;import com.badlogic.gdx.ai.steer.behaviors.CollisionAvoidance;
+&nbsp;import com.badlogic.gdx.ai.steer.behaviors.PrioritySteering;
+&nbsp;import com.badlogic.gdx.math.Vector2;
+&nbsp;import com.badlogic.gdx.physics.box2d.World;
+&nbsp;import com.devcharles.piazzapanic.components.AIAgentComponent;
+&nbsp;import com.devcharles.piazzapanic.components.ControllableComponent;
+&nbsp;import com.devcharles.piazzapanic.components.CustomerComponent;
+&nbsp;import com.devcharles.piazzapanic.components.ItemComponent;
+&nbsp;import com.devcharles.piazzapanic.components.PlayerComponent;
+&nbsp;import com.devcharles.piazzapanic.components.TransformComponent;
+&nbsp;import com.devcharles.piazzapanic.components.FoodComponent.FoodType;
+&nbsp;import com.devcharles.piazzapanic.scene2d.Hud;
+&nbsp;import com.devcharles.piazzapanic.utility.EntityFactory;
+&nbsp;import com.devcharles.piazzapanic.utility.GdxTimer;
+&nbsp;import com.devcharles.piazzapanic.utility.Mappers;
+&nbsp;import com.devcharles.piazzapanic.utility.box2d.Box2dLocation;
+&nbsp;import com.devcharles.piazzapanic.utility.box2d.Box2dRadiusProximity;
+&nbsp;
+&nbsp;/**
+&nbsp; * Controls the AI Customers, creates orders.
+&nbsp; *
+&nbsp; * @author Andrey Samoilov
+&nbsp; * @author Alistair Foggin
+&nbsp; */
+<b class="fc">&nbsp;public class CustomerAISystem extends IteratingSystem {</b>
+&nbsp;
+&nbsp;  private final Map&lt;Integer, Map&lt;Integer, Box2dLocation&gt;&gt; objectives;
+&nbsp;  private final Map&lt;Integer, Boolean&gt; objectiveTaken;
+&nbsp;
+&nbsp;  private final World world;
+<b class="fc">&nbsp;  protected final GdxTimer spawnTimer = new GdxTimer(30000, false, true);</b>
+&nbsp;  private final EntityFactory factory;
+<b class="fc">&nbsp;  private int totalCustomers = 0;</b>
+<b class="fc">&nbsp;  private float patienceModifier = 1f;</b>
+&nbsp;
+<b class="fc">&nbsp;  private int incomeModifier = 1;</b>
+&nbsp;  private final Hud hud;
+&nbsp;  private final Integer[] reputationPointsAndMoney;
+<b class="fc">&nbsp;  private final int MAX_CUSTOMERS = 5;</b>
+<b class="fc">&nbsp;  private boolean firstSpawn = true;</b>
+&nbsp;  private final boolean isEndless;
+<b class="fc">&nbsp;  private int numQueuedCustomers = 0;</b>
+&nbsp;  private int maxGroupSize;
+&nbsp;
+&nbsp;  private int maxScenarioCustomers;
+&nbsp;
+<b class="fc">&nbsp;  private int customerPatience = 90000;</b>
+&nbsp;
+&nbsp;  // List of customer groups, on removal we move the other customers up a place (queueing).
+<b class="fc">&nbsp;  protected final ArrayList&lt;ArrayList&lt;Entity&gt;&gt; customers = new ArrayList&lt;ArrayList&lt;Entity&gt;&gt;(</b>
+<b class="fc">&nbsp;      MAX_CUSTOMERS) {</b>
+&nbsp;    @Override
+&nbsp;    public boolean remove(Object o) {
+<b class="fc">&nbsp;      for (ArrayList&lt;Entity&gt; group : customers) {</b>
+<b class="fc">&nbsp;        if (group == o) {</b>
+<b class="fc">&nbsp;          objectiveTaken.put(customers.indexOf(o), false);</b>
+&nbsp;        } else {
+<b class="nc">&nbsp;          int objective = -3;</b>
+<b class="nc">&nbsp;          for (Entity entity : group) {</b>
+<b class="nc">&nbsp;            AIAgentComponent aiAgent = Mappers.aiAgent.get(entity);</b>
+&nbsp;
+<b class="nc">&nbsp;            if (aiAgent.currentObjective - 1 &gt;= 0) {</b>
+<b class="nc">&nbsp;              objective = aiAgent.currentObjective;</b>
+<b class="nc">&nbsp;              if (!objectiveTaken.get(aiAgent.currentObjective - 1)) {</b>
+<b class="nc">&nbsp;                makeItGoThere(aiAgent, aiAgent.currentObjective - 1);</b>
+&nbsp;              }
+&nbsp;            }
+<b class="nc">&nbsp;          }</b>
+<b class="nc">&nbsp;          objectiveTaken.put(objective, false);</b>
+<b class="nc">&nbsp;          objectiveTaken.put(objective - 1, true);</b>
+&nbsp;        }
+<b class="fc">&nbsp;      }</b>
+<b class="fc">&nbsp;      return super.remove(o);</b>
+&nbsp;    }
+&nbsp;  };
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Instantiate the system.
+&nbsp;   *
+&nbsp;   * @param objectives               Map of objectives available
+&nbsp;   * @param world                    Box2D {@link World} for AI and disposing of customer entities.
+&nbsp;   * @param factory                  {@link EntityFactory} for creating new customers
+&nbsp;   * @param hud                      {@link Hud} for updating orders, reputation
+&nbsp;   * @param reputationPointsAndMoney array-wrapped integer reputation and money passed by-reference
+&nbsp;   *                                 See {@link Hud}
+&nbsp;   * @param isEndless                a boolean flag to decide whether there is a limit on customers
+&nbsp;   */
+&nbsp;  public CustomerAISystem(Map&lt;Integer, Map&lt;Integer, Box2dLocation&gt;&gt; objectives, World world,
+&nbsp;      EntityFactory factory, Hud hud,
+&nbsp;      Integer[] reputationPointsAndMoney, boolean isEndless) {
+<b class="fc">&nbsp;    super(Family.all(AIAgentComponent.class, CustomerComponent.class).get());</b>
+&nbsp;
+<b class="fc">&nbsp;    this.hud = hud;</b>
+<b class="fc">&nbsp;    this.objectives = objectives;</b>
+<b class="fc">&nbsp;    this.objectiveTaken = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;    this.reputationPointsAndMoney = reputationPointsAndMoney;</b>
+<b class="fc">&nbsp;    this.isEndless = isEndless;</b>
+<b class="fc">&nbsp;    this.maxGroupSize = isEndless ? 3 : 1;</b>
+<b class="fc">&nbsp;    this.maxScenarioCustomers = 5;</b>
+&nbsp;
+&nbsp;    // Use a reference to the world to destroy box2d bodies when despawning
+&nbsp;    // customers
+<b class="fc">&nbsp;    this.world = world;</b>
+<b class="fc">&nbsp;    this.factory = factory;</b>
+&nbsp;
+<b class="fc">&nbsp;    spawnTimer.start();</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Load state from the saved ai system
+&nbsp;   *
+&nbsp;   * @param savedSystem the saved state to load in
+&nbsp;   * @author Alistair Foggin
+&nbsp;   */
+&nbsp;  public void loadFromSave(SavableCustomerAISystem savedSystem) {
+&nbsp;    // Set objective taken.
+<b class="fc">&nbsp;    objectiveTaken.clear();</b>
+&nbsp;    // Event though objectiveTaken has a key of type Integer, the JSON loader loads it as a String,
+&nbsp;    // so type casting is necessary.
+<b class="fc">&nbsp;    for (Object key : savedSystem.objectiveTaken.keySet()) {</b>
+<b class="fc">&nbsp;      if (key instanceof Integer) {</b>
+<b class="fc">&nbsp;        objectiveTaken.put((Integer) key, savedSystem.objectiveTaken.get(key));</b>
+<b class="nc">&nbsp;      } else if (key instanceof String) {</b>
+<b class="nc">&nbsp;        objectiveTaken.put(Integer.valueOf((String) key), savedSystem.objectiveTaken.get(key));</b>
+&nbsp;      }
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+&nbsp;    // Set spawn timer
+<b class="fc">&nbsp;    spawnTimer.setElapsed(savedSystem.spawnTimer.elapsed);</b>
+<b class="fc">&nbsp;    spawnTimer.setDelay(savedSystem.spawnTimer.delay);</b>
+<b class="fc">&nbsp;    if (savedSystem.spawnTimer.running) {</b>
+<b class="fc">&nbsp;      spawnTimer.start();</b>
+&nbsp;    } else {
+<b class="nc">&nbsp;      spawnTimer.stop();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Set flags
+<b class="fc">&nbsp;    totalCustomers = savedSystem.totalCustomers;</b>
+<b class="fc">&nbsp;    firstSpawn = savedSystem.firstSpawn;</b>
+<b class="fc">&nbsp;    numQueuedCustomers = savedSystem.numQueuedCustomers;</b>
+<b class="fc">&nbsp;    patienceModifier = savedSystem.patienceModifier;</b>
+<b class="fc">&nbsp;    incomeModifier = savedSystem.incomeModifier;</b>
+&nbsp;
+<b class="fc">&nbsp;    for (ArrayList&lt;Entity&gt; group : customers) {</b>
+<b class="nc">&nbsp;      for (Entity customer : group) {</b>
+<b class="nc">&nbsp;        destroyCustomer(customer);</b>
+<b class="nc">&nbsp;      }</b>
+<b class="nc">&nbsp;      group.clear();</b>
+<b class="nc">&nbsp;    }</b>
+<b class="fc">&nbsp;    customers.clear();</b>
+&nbsp;
+&nbsp;    // Load customers
+<b class="fc">&nbsp;    for (ArrayList&lt;SavableCustomer&gt; savedGroup : savedSystem.customers) {</b>
+<b class="fc">&nbsp;      ArrayList&lt;Entity&gt; group = new ArrayList&lt;&gt;(3);</b>
+<b class="fc">&nbsp;      for (SavableCustomer savedCustomer : savedGroup) {</b>
+<b class="fc">&nbsp;        Entity newCustomer = savedCustomer.toEntity(factory);</b>
+<b class="fc">&nbsp;        group.add(newCustomer);</b>
+<b class="fc">&nbsp;        makeItGoThere(Mappers.aiAgent.get(newCustomer), savedCustomer.currentObjective);</b>
+<b class="fc">&nbsp;      }</b>
+<b class="fc">&nbsp;      customers.add(group);</b>
+<b class="fc">&nbsp;    }</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void update(float deltaTime) {
+&nbsp;    // Ensure timer actually ticks, and is not short-circuited by firstSpawn being true
+<b class="fc">&nbsp;    boolean timerComplete = spawnTimer.tick(deltaTime);</b>
+<b class="fc">&nbsp;    if (timerComplete &amp;&amp; (isEndless</b>
+&nbsp;        || totalCustomers + numQueuedCustomers &lt; maxScenarioCustomers)) {
+<b class="fc">&nbsp;      numQueuedCustomers++;</b>
+&nbsp;    }
+<b class="fc">&nbsp;    int numCustomers = isEndless ? customers.size() : totalCustomers;</b>
+<b class="fc">&nbsp;    if (firstSpawn) {</b>
+<b class="fc">&nbsp;      firstSpawn = false;</b>
+<b class="fc">&nbsp;      spawnCustomerGroup();</b>
+&nbsp;    }
+<b class="fc">&nbsp;    if (numQueuedCustomers &gt; 0 &amp;&amp; numCustomers &lt; MAX_CUSTOMERS) {</b>
+<b class="fc">&nbsp;      numQueuedCustomers--;</b>
+<b class="fc">&nbsp;      if (isEndless) {</b>
+<b class="fc">&nbsp;        spawnTimer.setDelay((int) (spawnTimer.getDelay() * 0.98f));</b>
+&nbsp;      }
+&nbsp;
+<b class="fc">&nbsp;      spawnCustomerGroup();</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    ArrayList&lt;FoodType&gt; orders = new ArrayList&lt;&gt;(customers.size() * maxGroupSize);</b>
+<b class="fc">&nbsp;    for (ArrayList&lt;Entity&gt; group : customers) {</b>
+<b class="fc">&nbsp;      for (Entity customer : group) {</b>
+<b class="fc">&nbsp;        orders.add(Mappers.customer.get(customer).order);</b>
+<b class="fc">&nbsp;      }</b>
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+<b class="fc">&nbsp;    if (!hud.won) {</b>
+<b class="fc">&nbsp;      if (!isEndless &amp;&amp; customers.size() == 0 &amp;&amp; totalCustomers == maxScenarioCustomers) {</b>
+<b class="nc">&nbsp;        hud.triggerWin = true;</b>
+<b class="fc">&nbsp;      } else if (reputationPointsAndMoney[0] == 0) {</b>
+<b class="nc">&nbsp;        hud.triggerWin = true;</b>
+&nbsp;      }
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    super.update(deltaTime);</b>
+&nbsp;
+<b class="fc">&nbsp;    hud.updateOrders(orders);</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  private void spawnCustomerGroup() {
+<b class="fc">&nbsp;    ArrayList&lt;Entity&gt; group = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;    for (int i = 0; i &lt; MathUtils.random(1, maxGroupSize); i++) {</b>
+<b class="fc">&nbsp;      Entity newCustomer = factory.createCustomer(objectives.get(-2).get(0).getPosition(), null, isEndless);</b>
+<b class="fc">&nbsp;      Mappers.aiAgent.get(newCustomer).slot = i;</b>
+<b class="fc">&nbsp;      group.add(newCustomer);</b>
+<b class="fc">&nbsp;      GdxTimer timer = Mappers.customer.get(newCustomer).timer;</b>
+<b class="fc">&nbsp;      timer.setDelay((int) (customerPatience * patienceModifier));</b>
+<b class="fc">&nbsp;      timer.start();</b>
+<b class="fc">&nbsp;      makeItGoThere(Mappers.aiAgent.get(newCustomer), customers.size());</b>
+&nbsp;    }
+<b class="fc">&nbsp;    objectiveTaken.put(customers.size(), true);</b>
+<b class="fc">&nbsp;    customers.add(group);</b>
+<b class="fc">&nbsp;    totalCustomers++;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  protected void processEntity(Entity entity, float deltaTime) {
+<b class="fc">&nbsp;    AIAgentComponent aiAgent = Mappers.aiAgent.get(entity);</b>
+<b class="fc">&nbsp;    CustomerComponent customer = Mappers.customer.get(entity);</b>
+<b class="fc">&nbsp;    TransformComponent transform = Mappers.transform.get(entity);</b>
+&nbsp;
+<b class="fc">&nbsp;    if (customer.food != null &amp;&amp;</b>
+<b class="fc">&nbsp;        transform.position.x &gt;= (objectives.get(-1).get(0).getPosition().x - 2)) {</b>
+<b class="fc">&nbsp;      destroyCustomer(entity);</b>
+&nbsp;      return;
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    aiAgent.steeringBody.update(deltaTime);</b>
+&nbsp;
+&nbsp;    // lower reputation points if they have waited longer than time allotted (1 min)
+<b class="fc">&nbsp;    if (customer.timer.tick(deltaTime)) {</b>
+<b class="fc">&nbsp;      if (reputationPointsAndMoney[0] &gt; 0) {</b>
+<b class="fc">&nbsp;        reputationPointsAndMoney[0]--;</b>
+&nbsp;      }
+<b class="fc">&nbsp;      customer.timer.stop();</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    if (customer.interactingCook != null) {</b>
+<b class="fc">&nbsp;      PlayerComponent player = Mappers.player.get(customer.interactingCook);</b>
+&nbsp;
+&nbsp;      // In order, check if the player is touching and pressing
+&nbsp;      // the correct key to interact with the customer.
+<b class="fc">&nbsp;      if (player == null || !player.putDown) {</b>
+&nbsp;        return;
+&nbsp;      }
+<b class="fc">&nbsp;      player.putDown = false;</b>
+&nbsp;
+<b class="fc">&nbsp;      ControllableComponent cook = Mappers.controllable.get(customer.interactingCook);</b>
+&nbsp;
+<b class="fc">&nbsp;      if (cook.currentFood.isEmpty()) {</b>
+&nbsp;        return;
+&nbsp;      }
+&nbsp;
+<b class="fc">&nbsp;      Entity food = cook.currentFood.pop();</b>
+&nbsp;
+<b class="fc">&nbsp;      if (Mappers.food.get(food).type == customer.order) {</b>
+&nbsp;        // Fulfill order
+<b class="fc">&nbsp;        Gdx.app.log(&quot;Order success&quot;, customer.order.name());</b>
+<b class="fc">&nbsp;        fulfillOrder(entity, customer, food);</b>
+&nbsp;
+&nbsp;      } else {
+<b class="fc">&nbsp;        getEngine().removeEntity(food);</b>
+&nbsp;      }
+&nbsp;
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Remove the customer from the {@link World} and remove their entity.
+&nbsp;   */
+&nbsp;  protected void destroyCustomer(Entity customer) {
+<b class="fc">&nbsp;    getEngine().removeEntity(Mappers.customer.get(customer).food);</b>
+<b class="fc">&nbsp;    world.destroyBody(Mappers.b2body.get(customer).body);</b>
+<b class="fc">&nbsp;    getEngine().removeEntity(customer);</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Give the customer an objective to go to.
+&nbsp;   *
+&nbsp;   * @param locationID and id from {@link CustomerAISystem.objectives}
+&nbsp;   */
+&nbsp;  protected void makeItGoThere(AIAgentComponent aiAgent, int locationID) {
+<b class="fc">&nbsp;    Box2dLocation there = objectives.get(locationID).get(aiAgent.slot);</b>
+<b class="fc">&nbsp;    if (there == null) {</b>
+<b class="fc">&nbsp;      there = objectives.get(locationID).get(0);</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    Arrive&lt;Vector2&gt; arrive = new Arrive&lt;&gt;(aiAgent.steeringBody)</b>
+<b class="fc">&nbsp;        .setTimeToTarget(0.1f)</b>
+<b class="fc">&nbsp;        .setArrivalTolerance(0.25f)</b>
+<b class="fc">&nbsp;        .setDecelerationRadius(2)</b>
+<b class="fc">&nbsp;        .setTarget(there);</b>
+&nbsp;
+<b class="fc">&nbsp;    Proximity&lt;Vector2&gt; proximity = new Box2dRadiusProximity(aiAgent.steeringBody, world, 1f);</b>
+<b class="fc">&nbsp;    CollisionAvoidance&lt;Vector2&gt; collisionAvoidance = new CollisionAvoidance&lt;&gt;(</b>
+&nbsp;        aiAgent.steeringBody, proximity);
+&nbsp;
+<b class="fc">&nbsp;    PrioritySteering&lt;Vector2&gt; prioritySteering = new PrioritySteering&lt;&gt;(aiAgent.steeringBody)</b>
+<b class="fc">&nbsp;        .add(collisionAvoidance)</b>
+<b class="fc">&nbsp;        .add(arrive);</b>
+&nbsp;
+<b class="fc">&nbsp;    aiAgent.steeringBody.setSteeringBehavior(prioritySteering);</b>
+<b class="fc">&nbsp;    aiAgent.currentObjective = locationID;</b>
+&nbsp;
+<b class="fc">&nbsp;    if (locationID == -1) {</b>
+<b class="fc">&nbsp;      aiAgent.steeringBody.setOrientation(0);</b>
+&nbsp;    } else {
+<b class="fc">&nbsp;      aiAgent.steeringBody.setOrientation((float) (1.5f * Math.PI));</b>
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Give customer food, send them away and remove the order from the list
+&nbsp;   */
+&nbsp;  protected void fulfillOrder(Entity entity, CustomerComponent customer, Entity foodEntity) {
+&nbsp;
+<b class="fc">&nbsp;    Engine engine = getEngine();</b>
+&nbsp;
+<b class="fc">&nbsp;    customer.order = null;</b>
+&nbsp;
+<b class="fc">&nbsp;    ItemComponent heldItem = engine.createComponent(ItemComponent.class);</b>
+<b class="fc">&nbsp;    heldItem.holderTransform = Mappers.transform.get(entity);</b>
+&nbsp;
+<b class="fc">&nbsp;    foodEntity.add(heldItem);</b>
+&nbsp;
+<b class="fc">&nbsp;    customer.food = foodEntity;</b>
+&nbsp;
+<b class="fc">&nbsp;    AIAgentComponent aiAgent = Mappers.aiAgent.get(entity);</b>
+<b class="fc">&nbsp;    makeItGoThere(aiAgent, -1);</b>
+&nbsp;    // Give money for completion of order
+<b class="fc">&nbsp;    reputationPointsAndMoney[1] += 8 + incomeModifier;</b>
+&nbsp;
+<b class="fc">&nbsp;    customer.timer.stop();</b>
+<b class="fc">&nbsp;    customer.timer.reset();</b>
+<b class="fc">&nbsp;    ArrayList&lt;Entity&gt; groupToRemove = null;</b>
+<b class="fc">&nbsp;    for (ArrayList&lt;Entity&gt; group : customers) {</b>
+<b class="fc">&nbsp;      group.remove(entity);</b>
+<b class="fc">&nbsp;      if (group.isEmpty()) {</b>
+<b class="fc">&nbsp;        groupToRemove = group;</b>
+&nbsp;      }
+<b class="fc">&nbsp;    }</b>
+<b class="fc">&nbsp;    if (groupToRemove != null) {</b>
+<b class="fc">&nbsp;      customers.remove(groupToRemove);</b>
+&nbsp;    }
+<b class="fc">&nbsp;    hud.incrementCompletedOrders();</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public Map&lt;Integer, Boolean&gt; getObjectiveTaken() {
+<b class="fc">&nbsp;    return objectiveTaken;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public GdxTimer getSpawnTimer() {
+<b class="fc">&nbsp;    return spawnTimer;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public int getTotalCustomers() {
+<b class="fc">&nbsp;    return totalCustomers;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public boolean isFirstSpawn() {
+<b class="fc">&nbsp;    return firstSpawn;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public int getNumQueuedCustomers() {
+<b class="fc">&nbsp;    return numQueuedCustomers;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public ArrayList&lt;ArrayList&lt;Entity&gt;&gt; getCustomerGroups() {
+<b class="fc">&nbsp;    return customers;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public float getPatienceModifier() {
+<b class="fc">&nbsp;    return patienceModifier;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void setPatienceModifier(float patienceModifier) {
+<b class="fc">&nbsp;    this.patienceModifier = patienceModifier;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public int getIncomeModifier() {
+<b class="fc">&nbsp;    return incomeModifier;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void setIncomeModifier(int incomeModifier) {
+<b class="fc">&nbsp;    this.incomeModifier = incomeModifier;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void setDifficulty(Difficulty difficulty) {
+<b class="nc">&nbsp;    customerPatience = difficulty.customerPatience;</b>
+<b class="nc">&nbsp;    spawnTimer.setDelay(difficulty.customerDelay);</b>
+<b class="nc">&nbsp;    maxGroupSize = difficulty.maxGroupSize;</b>
+<b class="nc">&nbsp;    for (ArrayList&lt;Entity&gt; customerGroup : getCustomerGroups()) {</b>
+<b class="nc">&nbsp;      for (Entity customer : customerGroup) {</b>
+<b class="nc">&nbsp;        Mappers.customer.get(customer).timer.setDelay((int) (customerPatience * patienceModifier));</b>
+<b class="nc">&nbsp;      }</b>
+<b class="nc">&nbsp;    }</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void setMaxScenarioCustomers(int maxScenarioCustomers) {
+<b class="nc">&nbsp;    this.maxScenarioCustomers = maxScenarioCustomers;</b>
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>

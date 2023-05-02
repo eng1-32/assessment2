@@ -1,0 +1,342 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Box2dSteeringBody</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic.utility.box2d</a>
+</div>
+
+<h1>Coverage Summary for Class: Box2dSteeringBody (com.devcharles.piazzapanic.utility.box2d)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Box2dSteeringBody</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    45.2%
+  </span>
+  <span class="absValue">
+    (14/31)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (30/60)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*******************************************************************************
+&nbsp; * Copyright 2014 davebaol https://github.com/davebaol
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *   http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; ******************************************************************************/
+&nbsp;
+&nbsp;/*
+&nbsp; * Max velocity/acceleration values were set and applySteering() was modified to fit the needs of this project.
+&nbsp; */
+&nbsp;package com.devcharles.piazzapanic.utility.box2d;
+&nbsp;
+&nbsp;import com.badlogic.gdx.ai.steer.Steerable;
+&nbsp;import com.badlogic.gdx.ai.steer.SteeringAcceleration;
+&nbsp;import com.badlogic.gdx.ai.steer.SteeringBehavior;
+&nbsp;import com.badlogic.gdx.ai.utils.Location;
+&nbsp;import com.badlogic.gdx.math.Vector2;
+&nbsp;import com.badlogic.gdx.physics.box2d.Body;
+&nbsp;
+&nbsp;/**
+&nbsp; * Box2D {@link Body} and logic for AI agents, the {@link Box2dSteeringBody} responds to inputs from
+&nbsp; * a {@link SteeringBehavior}. If no behaviour is set, the body will not move.
+&nbsp; */
+&nbsp;public class Box2dSteeringBody implements Steerable&lt;Vector2&gt; {
+&nbsp;
+&nbsp;  Body body;
+&nbsp;
+&nbsp;  float boundingRadius;
+&nbsp;  boolean tagged;
+&nbsp;
+<b class="fc">&nbsp;  float maxLinearSpeed = 1000;</b>
+<b class="fc">&nbsp;  float maxLinearAcceleration = 1000;</b>
+<b class="fc">&nbsp;  float maxAngularSpeed = 1000;</b>
+<b class="fc">&nbsp;  float maxAngularAcceleration = 1000;</b>
+&nbsp;
+&nbsp;  boolean independentFacing;
+&nbsp;
+&nbsp;  protected SteeringBehavior&lt;Vector2&gt; steeringBehavior;
+&nbsp;
+<b class="fc">&nbsp;  private static final SteeringAcceleration&lt;Vector2&gt; steeringOutput = new SteeringAcceleration&lt;&gt;(</b>
+&nbsp;      new Vector2());
+&nbsp;
+<b class="fc">&nbsp;  public Box2dSteeringBody(Body body, boolean independentFacing, float boundingRadius) {</b>
+<b class="fc">&nbsp;    this.body = body;</b>
+<b class="fc">&nbsp;    this.independentFacing = independentFacing;</b>
+<b class="fc">&nbsp;    this.boundingRadius = boundingRadius;</b>
+<b class="fc">&nbsp;    this.tagged = false;</b>
+&nbsp;
+<b class="fc">&nbsp;    body.setUserData(this);</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public Body getBody() {
+<b class="nc">&nbsp;    return body;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void setBody(Body body) {
+<b class="nc">&nbsp;    this.body = body;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public boolean isIndependentFacing() {
+<b class="fc">&nbsp;    return independentFacing;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void setIndependentFacing(boolean independentFacing) {
+<b class="nc">&nbsp;    this.independentFacing = independentFacing;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public Vector2 getPosition() {
+<b class="fc">&nbsp;    return body.getPosition();</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public float getOrientation() {
+<b class="nc">&nbsp;    return body.getAngle();</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void setOrientation(float orientation) {
+<b class="fc">&nbsp;    body.setTransform(getPosition(), orientation);</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public Vector2 getLinearVelocity() {
+<b class="fc">&nbsp;    return body.getLinearVelocity();</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public float getAngularVelocity() {
+<b class="nc">&nbsp;    return body.getAngularVelocity();</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public float getBoundingRadius() {
+<b class="fc">&nbsp;    return boundingRadius;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public boolean isTagged() {
+<b class="nc">&nbsp;    return tagged;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void setTagged(boolean tagged) {
+<b class="nc">&nbsp;    this.tagged = tagged;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public Location&lt;Vector2&gt; newLocation() {
+<b class="nc">&nbsp;    return new Box2dLocation();</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public float vectorToAngle(Vector2 vector) {
+<b class="fc">&nbsp;    return (float) Math.atan2(-vector.x, vector.y);</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public Vector2 angleToVector(Vector2 outVector, float angle) {
+<b class="fc">&nbsp;    outVector.x = -(float) Math.sin(angle);</b>
+<b class="fc">&nbsp;    outVector.y = (float) Math.cos(angle);</b>
+<b class="fc">&nbsp;    return outVector;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public SteeringBehavior&lt;Vector2&gt; getSteeringBehavior() {
+<b class="fc">&nbsp;    return steeringBehavior;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void setSteeringBehavior(SteeringBehavior&lt;Vector2&gt; steeringBehavior) {
+<b class="fc">&nbsp;    this.steeringBehavior = steeringBehavior;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void update(float deltaTime) {
+<b class="fc">&nbsp;    if (steeringBehavior != null) {</b>
+&nbsp;      // Calculate steering acceleration
+<b class="fc">&nbsp;      steeringBehavior.calculateSteering(steeringOutput);</b>
+&nbsp;      // Apply steering acceleration
+<b class="fc">&nbsp;      applySteering(deltaTime);</b>
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  protected void applySteering(float deltaTime) {
+<b class="fc">&nbsp;    boolean anyAccelerations = false;</b>
+&nbsp;
+&nbsp;    // Update position and linear velocity.
+<b class="fc">&nbsp;    if (!steeringOutput.linear.isZero()) {</b>
+&nbsp;      // this method internally scales the force by deltaTime
+<b class="nc">&nbsp;      body.applyForceToCenter(steeringOutput.linear.cpy().scl(2), true);</b>
+<b class="nc">&nbsp;      anyAccelerations = true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // Update orientation and angular velocity
+<b class="fc">&nbsp;    if (isIndependentFacing() &amp;&amp; steeringOutput.angular != 0) {</b>
+&nbsp;      // this method internally scales the torque by deltaTime
+<b class="nc">&nbsp;      body.applyTorque(steeringOutput.angular, true);</b>
+<b class="nc">&nbsp;      anyAccelerations = true;</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    if (anyAccelerations) {</b>
+&nbsp;      // Cap the linear speed
+<b class="nc">&nbsp;      Vector2 velocity = body.getLinearVelocity();</b>
+<b class="nc">&nbsp;      float currentSpeedSquare = velocity.len2();</b>
+<b class="nc">&nbsp;      float maxLinearSpeed = getMaxLinearSpeed();</b>
+<b class="nc">&nbsp;      if (currentSpeedSquare &gt; maxLinearSpeed * maxLinearSpeed) {</b>
+<b class="nc">&nbsp;        body.setLinearVelocity(</b>
+<b class="nc">&nbsp;            velocity.scl(maxLinearSpeed / (float) Math.sqrt(currentSpeedSquare)));</b>
+&nbsp;      }
+&nbsp;
+&nbsp;      // Cap the angular speed
+<b class="nc">&nbsp;      float maxAngVelocity = getMaxAngularSpeed();</b>
+<b class="nc">&nbsp;      if (body.getAngularVelocity() &gt; maxAngVelocity) {</b>
+<b class="nc">&nbsp;        body.setAngularVelocity(maxAngVelocity);</b>
+&nbsp;      }
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  //
+&nbsp;  // Limiter implementation
+&nbsp;  //
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public float getMaxLinearSpeed() {
+<b class="nc">&nbsp;    return maxLinearSpeed;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void setMaxLinearSpeed(float maxLinearSpeed) {
+<b class="nc">&nbsp;    this.maxLinearSpeed = maxLinearSpeed;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public float getMaxLinearAcceleration() {
+<b class="nc">&nbsp;    return maxLinearAcceleration;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void setMaxLinearAcceleration(float maxLinearAcceleration) {
+<b class="nc">&nbsp;    this.maxLinearAcceleration = maxLinearAcceleration;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public float getMaxAngularSpeed() {
+<b class="nc">&nbsp;    return maxAngularSpeed;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void setMaxAngularSpeed(float maxAngularSpeed) {
+<b class="nc">&nbsp;    this.maxAngularSpeed = maxAngularSpeed;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public float getMaxAngularAcceleration() {
+<b class="nc">&nbsp;    return maxAngularAcceleration;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void setMaxAngularAcceleration(float maxAngularAcceleration) {
+<b class="nc">&nbsp;    this.maxAngularAcceleration = maxAngularAcceleration;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public float getZeroLinearSpeedThreshold() {
+<b class="nc">&nbsp;    return 0.001f;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void setZeroLinearSpeedThreshold(float value) {
+<b class="fc">&nbsp;    throw new UnsupportedOperationException();</b>
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,330 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MapLoader</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic.utility</a>
+</div>
+
+<h1>Coverage Summary for Class: MapLoader (com.devcharles.piazzapanic.utility)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MapLoader</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85.7%
+  </span>
+  <span class="absValue">
+    (6/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    91.3%
+  </span>
+  <span class="absValue">
+    (84/92)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.devcharles.piazzapanic.utility;
+&nbsp;
+&nbsp;import box2dLight.RayHandler;
+&nbsp;import com.badlogic.ashley.core.Entity;
+&nbsp;import com.badlogic.gdx.Gdx;
+&nbsp;import com.badlogic.gdx.assets.AssetManager;
+&nbsp;import com.badlogic.gdx.graphics.Color;
+&nbsp;import com.badlogic.gdx.maps.MapObject;
+&nbsp;import com.badlogic.gdx.maps.MapObjects;
+&nbsp;import com.badlogic.gdx.maps.MapProperties;
+&nbsp;import com.badlogic.gdx.maps.objects.RectangleMapObject;
+&nbsp;import com.badlogic.gdx.maps.tiled.TiledMap;
+&nbsp;import com.badlogic.gdx.maps.tiled.objects.TiledMapTileMapObject;
+&nbsp;import com.badlogic.gdx.math.Vector2;
+&nbsp;import com.badlogic.gdx.physics.box2d.Body;
+&nbsp;import com.badlogic.gdx.physics.box2d.World;
+&nbsp;import com.badlogic.gdx.utils.Array;
+&nbsp;import com.devcharles.piazzapanic.components.FoodComponent.FoodType;
+&nbsp;import com.devcharles.piazzapanic.utility.Station.StationType;
+&nbsp;import com.devcharles.piazzapanic.utility.box2d.Box2dLocation;
+&nbsp;import com.devcharles.piazzapanic.utility.box2d.LightBuilder;
+&nbsp;import com.devcharles.piazzapanic.utility.box2d.MapBodyBuilder;
+&nbsp;import java.util.HashMap;
+&nbsp;import java.util.Map;
+&nbsp;
+&nbsp;/**
+&nbsp; * Loads and owns the {@link TiledMap} object. Creates entities from map metadata.
+&nbsp; *
+&nbsp; * @author Andrey Samoilov
+&nbsp; * @author Alistair Foggin
+&nbsp; */
+&nbsp;public class MapLoader {
+&nbsp;
+&nbsp;  public TiledMap map;
+&nbsp;
+<b class="fc">&nbsp;  private int ppt = 16;</b>
+&nbsp;
+&nbsp;  private final EntityFactory factory;
+&nbsp;
+&nbsp;  // Object properties
+&nbsp;  static final String lightIdProperty = &quot;lightID&quot;;
+&nbsp;  static final String cookSpawnPoint = &quot;cookspawnpoint&quot;;
+&nbsp;  static final String aiSpawnPoint = &quot;aispawnpoint&quot;;
+&nbsp;  static final String aiObjective = &quot;aiobjective&quot;;
+&nbsp;  static final String aiSlot = &quot;aislot&quot;;
+&nbsp;
+&nbsp;  // Layers relevant to loading the map
+&nbsp;  static final String objectLayer = &quot;MapObjects&quot;;
+&nbsp;  static final String collisionLayer = &quot;Obstacles&quot;;
+&nbsp;  static final String stationLayer = &quot;station&quot;;
+&nbsp;  static final String counterTopLayer = &quot;countertop&quot;;
+&nbsp;
+&nbsp;  // Tile properties
+&nbsp;  static final String stationIdProperty = &quot;stationID&quot;;
+&nbsp;  static final String ingredientTypeProperty = &quot;ingredientType&quot;;
+&nbsp;
+&nbsp;  private Map&lt;Integer, Map&lt;Integer, Box2dLocation&gt;&gt; aiObjectives;
+&nbsp;
+&nbsp;  private Map&lt;Integer, Vector2&gt; cookSpawns;
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Load the {@link TiledMap} from a {@code .tmx} file.
+&nbsp;   *
+&nbsp;   * @param path    Path to map file.
+&nbsp;   * @param ppt     Pixels per tile (default 16).
+&nbsp;   * @param factory {@link EntityFactory} instance to create entities based on the map metadata.
+&nbsp;   */
+<b class="fc">&nbsp;  public MapLoader(String path, Integer ppt, EntityFactory factory, AssetManager assetManager) {</b>
+<b class="fc">&nbsp;    if (ppt != null) {</b>
+<b class="nc">&nbsp;      this.ppt = ppt;</b>
+&nbsp;    }
+<b class="fc">&nbsp;    if (path == null) {</b>
+<b class="nc">&nbsp;      path = &quot;v2/map.tmx&quot;;</b>
+&nbsp;    }
+<b class="fc">&nbsp;    map = assetManager.get(path, TiledMap.class);</b>
+&nbsp;
+<b class="fc">&nbsp;    this.factory = factory;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * @param world The Box2D world instance to add bodies to.
+&nbsp;   * @return The bodies created from the map.
+&nbsp;   */
+&nbsp;  public Array&lt;Body&gt; buildCollisions(World world) {
+<b class="nc">&nbsp;    return MapBodyBuilder.buildShapes(map, ppt, world);</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Create lights, spawnpoints, AI paths from map metadata.
+&nbsp;   *
+&nbsp;   * @param rayHandler {@link RayHandler} to add lights to.
+&nbsp;   */
+&nbsp;  public void buildFromObjects(RayHandler rayHandler) {
+<b class="fc">&nbsp;    MapObjects objects = map.getLayers().get(objectLayer).getObjects();</b>
+&nbsp;
+<b class="fc">&nbsp;    aiObjectives = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;    cookSpawns = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;    for (MapObject mapObject : objects) {</b>
+&nbsp;
+<b class="fc">&nbsp;      if (mapObject instanceof RectangleMapObject) {</b>
+<b class="fc">&nbsp;        MapProperties properties = mapObject.getProperties();</b>
+<b class="fc">&nbsp;        RectangleMapObject point = (RectangleMapObject) mapObject;</b>
+&nbsp;
+<b class="fc">&nbsp;        Vector2 pos = new Vector2(point.getRectangle().x / ppt, point.getRectangle().y / ppt);</b>
+&nbsp;
+<b class="fc">&nbsp;        if (properties.containsKey(lightIdProperty)) {</b>
+<b class="fc">&nbsp;          int lightID = (int) properties.get(lightIdProperty);</b>
+<b class="fc">&nbsp;          Gdx.app.log(&quot;map parsing&quot;,</b>
+<b class="fc">&nbsp;              String.format(&quot;Light typeid %d at x:%.2f y:%.2f&quot;, lightID, pos.x, pos.y));</b>
+<b class="fc">&nbsp;          switch (lightID) {</b>
+&nbsp;            case 0:
+<b class="nc">&nbsp;              LightBuilder.createPointLight(rayHandler, pos.x, pos.y,</b>
+<b class="nc">&nbsp;                  Color.TAN.cpy().sub(0, 0, 0, 0.25f), 10, true);</b>
+<b class="nc">&nbsp;              break;</b>
+&nbsp;            case 1:
+<b class="fc">&nbsp;              LightBuilder.createPointLight(rayHandler, pos.x, pos.y,</b>
+<b class="fc">&nbsp;                  Color.TAN.cpy().sub(0, 0, 0, 0.5f), 0.8f, false);</b>
+<b class="fc">&nbsp;              break;</b>
+&nbsp;            case 2:
+<b class="fc">&nbsp;              LightBuilder.createRoomLight(rayHandler, pos.x, pos.y,</b>
+<b class="fc">&nbsp;                  Color.TAN.cpy().sub(0, 0, 0, 0.25f), 25, true);</b>
+<b class="fc">&nbsp;              break;</b>
+&nbsp;            case 3:
+<b class="fc">&nbsp;              LightBuilder.createRoomLight(rayHandler, pos.x, pos.y,</b>
+<b class="fc">&nbsp;                  Color.TAN.cpy().sub(0, 0, 0, 0.25f), 25, false);</b>
+&nbsp;              break;
+&nbsp;          }
+&nbsp;
+<b class="fc">&nbsp;        } else if (properties.containsKey(cookSpawnPoint)) {</b>
+<b class="fc">&nbsp;          int cookID = (int) properties.get(cookSpawnPoint);</b>
+<b class="fc">&nbsp;          Gdx.app.log(&quot;map parsing&quot;,</b>
+<b class="fc">&nbsp;              String.format(&quot;Cook spawn point at x:%.2f y:%.2f&quot;, pos.x, pos.y));</b>
+<b class="fc">&nbsp;          cookSpawns.put(cookID, pos);</b>
+<b class="fc">&nbsp;        } else if (properties.containsKey(aiSpawnPoint)) {</b>
+<b class="fc">&nbsp;          Gdx.app.log(&quot;map parsing&quot;,</b>
+<b class="fc">&nbsp;              String.format(&quot;Ai spawn point at x:%.2f y:%.2f&quot;, pos.x, pos.y));</b>
+<b class="fc">&nbsp;          HashMap&lt;Integer, Box2dLocation&gt; spawn = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;          spawn.put(0, new Box2dLocation(pos, 0));</b>
+<b class="fc">&nbsp;          aiObjectives.put(-2, spawn);</b>
+<b class="fc">&nbsp;        } else if (properties.containsKey(aiObjective)) {</b>
+<b class="fc">&nbsp;          int objective = properties.get(aiObjective, Integer.class);</b>
+<b class="fc">&nbsp;          int slot = properties.containsKey(aiSlot) ? properties.get(aiSlot, Integer.class) : 0;</b>
+<b class="fc">&nbsp;          Map&lt;Integer, Box2dLocation&gt; slots = aiObjectives.get(objective);</b>
+<b class="fc">&nbsp;          if (slots == null) {</b>
+<b class="fc">&nbsp;            slots = new HashMap&lt;&gt;();</b>
+<b class="fc">&nbsp;            aiObjectives.put(objective, slots);</b>
+&nbsp;          }
+<b class="fc">&nbsp;          slots.put(slot, new Box2dLocation(new Vector2(pos.x, pos.y), (float) (1.5f * Math.PI)));</b>
+<b class="fc">&nbsp;          Gdx.app.log(&quot;map parsing&quot;,</b>
+<b class="fc">&nbsp;              String.format(&quot;Ai objective %d at x:%.2f y:%.2f&quot;, objective, pos.x, pos.y));</b>
+&nbsp;        }
+&nbsp;      }
+<b class="fc">&nbsp;    }</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Get the {@link Map} of objectives the AI can travel to. See the map file in the Tiled editor to
+&nbsp;   * preview ai objectives.
+&nbsp;   *
+&nbsp;   * @return
+&nbsp;   */
+&nbsp;  public Map&lt;Integer, Map&lt;Integer, Box2dLocation&gt;&gt; getObjectives() {
+<b class="fc">&nbsp;    return aiObjectives;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Create station entities from map metadata. Metadata is given to the tile in Edit Tileset -&gt;
+&nbsp;   * Tile Properties.
+&nbsp;   */
+&nbsp;  public Map&lt;Integer, Entity&gt; buildStations() {
+<b class="fc">&nbsp;    MapObjects stations = map.getLayers().get(&quot;StationObjects&quot;).getObjects();</b>
+<b class="fc">&nbsp;    MapObjects stations_f = map.getLayers().get(&quot;StationObjects_f&quot;).getObjects();</b>
+<b class="fc">&nbsp;    Map&lt;Integer, Entity&gt; stationsMap = new HashMap&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;    int id = 0;</b>
+&nbsp;
+<b class="fc">&nbsp;    for (MapObject mapObject : stations) {</b>
+<b class="fc">&nbsp;      MapProperties tileProperties = mapObject.getProperties();</b>
+<b class="fc">&nbsp;      TiledMapTileMapObject stationObject = (TiledMapTileMapObject) mapObject;</b>
+&nbsp;
+<b class="fc">&nbsp;      Integer object = tileProperties.get(stationIdProperty, Integer.class);</b>
+<b class="fc">&nbsp;      if (object == null) {</b>
+<b class="nc">&nbsp;        continue;</b>
+&nbsp;      }
+<b class="fc">&nbsp;      buildStation(stationsMap, id, tileProperties, stationObject, object);</b>
+<b class="fc">&nbsp;      id++;</b>
+<b class="fc">&nbsp;    }</b>
+<b class="fc">&nbsp;    for (MapObject mapObject : stations_f) {</b>
+<b class="fc">&nbsp;      MapProperties tileProperties = mapObject.getProperties();</b>
+<b class="fc">&nbsp;      TiledMapTileMapObject stationObject = (TiledMapTileMapObject) mapObject;</b>
+&nbsp;
+<b class="fc">&nbsp;      Integer object = tileProperties.get(stationIdProperty, Integer.class);</b>
+<b class="fc">&nbsp;      if (object == null) {</b>
+<b class="nc">&nbsp;        continue;</b>
+&nbsp;      }
+<b class="fc">&nbsp;      buildStation(stationsMap, id, tileProperties, stationObject, object);</b>
+<b class="fc">&nbsp;      id++;</b>
+<b class="fc">&nbsp;    }</b>
+<b class="fc">&nbsp;    return stationsMap;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  private void buildStation(Map&lt;Integer, Entity&gt; stationsMap, int id, MapProperties tileProperties,
+&nbsp;      TiledMapTileMapObject stationObject, Integer object) {
+<b class="fc">&nbsp;    Vector2 pos = new Vector2(stationObject.getX() / ppt + 1, stationObject.getY() / ppt + 1);</b>
+<b class="fc">&nbsp;    StationType stationType = StationType.from(object);</b>
+<b class="fc">&nbsp;    FoodType ingredientType = null;</b>
+&nbsp;
+<b class="fc">&nbsp;    if (stationType == StationType.ingredient) {</b>
+<b class="fc">&nbsp;      ingredientType = FoodType.from((Integer) tileProperties.get(ingredientTypeProperty));</b>
+&nbsp;    }
+<b class="fc">&nbsp;    Boolean isLocked = stationObject.getProperties().get(&quot;locked&quot;, Boolean.class);</b>
+<b class="fc">&nbsp;    if (tileProperties.get(&quot;locked&quot;, Boolean.class) == null) {</b>
+<b class="fc">&nbsp;      isLocked = false;</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    Entity station = factory.createStation(id, stationType, pos, ingredientType, isLocked);</b>
+<b class="fc">&nbsp;    Mappers.texture.get(station).region = stationObject.getTextureRegion();</b>
+<b class="fc">&nbsp;    Mappers.texture.get(station).scale.set(1f / ppt, 1f / ppt);</b>
+<b class="fc">&nbsp;    stationsMap.put(id, station);</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public Map&lt;Integer, Vector2&gt; getCookSpawns() {
+<b class="fc">&nbsp;    return cookSpawns;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>

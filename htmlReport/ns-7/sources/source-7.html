@@ -1,0 +1,266 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > MapBodyBuilder</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic.utility.box2d</a>
+</div>
+
+<h1>Coverage Summary for Class: MapBodyBuilder (com.devcharles.piazzapanic.utility.box2d)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">MapBodyBuilder</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87.5%
+  </span>
+  <span class="absValue">
+    (7/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    88.7%
+  </span>
+  <span class="absValue">
+    (63/71)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.devcharles.piazzapanic.utility.box2d;
+&nbsp;
+&nbsp;import com.badlogic.gdx.maps.Map;
+&nbsp;import com.badlogic.gdx.maps.MapObject;
+&nbsp;import com.badlogic.gdx.maps.MapObjects;
+&nbsp;import com.badlogic.gdx.maps.objects.CircleMapObject;
+&nbsp;import com.badlogic.gdx.maps.objects.PolygonMapObject;
+&nbsp;import com.badlogic.gdx.maps.objects.PolylineMapObject;
+&nbsp;import com.badlogic.gdx.maps.objects.RectangleMapObject;
+&nbsp;import com.badlogic.gdx.maps.objects.TextureMapObject;
+&nbsp;import com.badlogic.gdx.maps.tiled.TiledMap;
+&nbsp;import com.badlogic.gdx.math.Circle;
+&nbsp;import com.badlogic.gdx.math.Rectangle;
+&nbsp;import com.badlogic.gdx.math.Vector2;
+&nbsp;import com.badlogic.gdx.physics.box2d.Body;
+&nbsp;import com.badlogic.gdx.physics.box2d.BodyDef;
+&nbsp;import com.badlogic.gdx.physics.box2d.BodyDef.BodyType;
+&nbsp;import com.badlogic.gdx.physics.box2d.ChainShape;
+&nbsp;import com.badlogic.gdx.physics.box2d.CircleShape;
+&nbsp;import com.badlogic.gdx.physics.box2d.Filter;
+&nbsp;import com.badlogic.gdx.physics.box2d.PolygonShape;
+&nbsp;import com.badlogic.gdx.physics.box2d.Shape;
+&nbsp;import com.badlogic.gdx.physics.box2d.World;
+&nbsp;import com.badlogic.gdx.utils.Array;
+&nbsp;
+&nbsp;/**
+&nbsp; * Populates the world with bodies created from the obstacle layer. Used for creating collisions.
+&nbsp; *
+&nbsp; * @author Andrey Samoilov
+&nbsp; */
+<b class="nc">&nbsp;public class MapBodyBuilder {</b>
+&nbsp;
+&nbsp;  // The pixels per tile. If your tiles are 16x16, this is set to 16f
+<b class="fc">&nbsp;  private static float ppt = 16;</b>
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Create collision boxes from the MapObjects on the Obstacle object layer.
+&nbsp;   *
+&nbsp;   * @param map    {@link TiledMap} to create bodies from.
+&nbsp;   * @param pixels Pixels per tile (default 16).
+&nbsp;   * @param world  Box2D {@link World} to create objects in.
+&nbsp;   * @return
+&nbsp;   */
+&nbsp;  public static Array&lt;Body&gt; buildShapes(Map map, float pixels, World world) {
+<b class="fc">&nbsp;    ppt = pixels;</b>
+<b class="fc">&nbsp;    MapObjects shadowedObjects = map.getLayers().get(&quot;Obstacles&quot;).getObjects();</b>
+&nbsp;
+<b class="fc">&nbsp;    Array&lt;Body&gt; bodies = new Array&lt;&gt;();</b>
+&nbsp;
+<b class="fc">&nbsp;    for (MapObject object : shadowedObjects) {</b>
+&nbsp;
+<b class="fc">&nbsp;      Shape shape = decideShape(object);</b>
+&nbsp;
+<b class="fc">&nbsp;      if (shape == null) {</b>
+<b class="nc">&nbsp;        continue;</b>
+&nbsp;      }
+&nbsp;
+<b class="fc">&nbsp;      BodyDef bd = new BodyDef();</b>
+<b class="fc">&nbsp;      bd.type = BodyType.StaticBody;</b>
+<b class="fc">&nbsp;      Body body = world.createBody(bd);</b>
+<b class="fc">&nbsp;      body.createFixture(shape, 1);</b>
+&nbsp;
+<b class="fc">&nbsp;      bodies.add(body);</b>
+&nbsp;
+<b class="fc">&nbsp;      shape.dispose();</b>
+<b class="fc">&nbsp;    }</b>
+&nbsp;
+<b class="fc">&nbsp;    MapObjects objects = map.getLayers().get(&quot;Obstacles_NoShadow&quot;).getObjects();</b>
+&nbsp;
+<b class="fc">&nbsp;    for (MapObject object : objects) {</b>
+<b class="fc">&nbsp;      Shape shape = decideShape(object);</b>
+&nbsp;
+<b class="fc">&nbsp;      if (shape == null) {</b>
+<b class="nc">&nbsp;        continue;</b>
+&nbsp;      }
+&nbsp;
+<b class="fc">&nbsp;      BodyDef bd = new BodyDef();</b>
+<b class="fc">&nbsp;      bd.type = BodyType.StaticBody;</b>
+<b class="fc">&nbsp;      Body body = world.createBody(bd);</b>
+<b class="fc">&nbsp;      Filter collisionFilter = new Filter();</b>
+<b class="fc">&nbsp;      collisionFilter.categoryBits = CollisionCategory.NO_SHADOWBOUNDARY.getValue();</b>
+<b class="fc">&nbsp;      collisionFilter.maskBits = CollisionCategory.ENTITY.getValue();</b>
+<b class="fc">&nbsp;      body.createFixture(shape, 1).setFilterData(collisionFilter);</b>
+&nbsp;
+<b class="fc">&nbsp;      bodies.add(body);</b>
+&nbsp;
+<b class="fc">&nbsp;      shape.dispose();</b>
+<b class="fc">&nbsp;    }</b>
+<b class="fc">&nbsp;    return bodies;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  protected static Shape decideShape(MapObject object) {
+<b class="fc">&nbsp;    if (object instanceof TextureMapObject) {</b>
+<b class="nc">&nbsp;      return null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    Shape shape;
+&nbsp;
+<b class="fc">&nbsp;    if (object instanceof RectangleMapObject) {</b>
+<b class="fc">&nbsp;      shape = getRectangle((RectangleMapObject) object);</b>
+<b class="fc">&nbsp;    } else if (object instanceof PolygonMapObject) {</b>
+<b class="nc">&nbsp;      shape = getPolygon((PolygonMapObject) object);</b>
+<b class="fc">&nbsp;    } else if (object instanceof PolylineMapObject) {</b>
+<b class="fc">&nbsp;      shape = getPolyline((PolylineMapObject) object);</b>
+<b class="nc">&nbsp;    } else if (object instanceof CircleMapObject) {</b>
+<b class="nc">&nbsp;      shape = getCircle((CircleMapObject) object);</b>
+&nbsp;    } else {
+<b class="nc">&nbsp;      return null;</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    return shape;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  protected static PolygonShape getRectangle(RectangleMapObject rectangleObject) {
+<b class="fc">&nbsp;    Rectangle rectangle = rectangleObject.getRectangle();</b>
+<b class="fc">&nbsp;    PolygonShape polygon = new PolygonShape();</b>
+<b class="fc">&nbsp;    Vector2 size = new Vector2((rectangle.x + rectangle.width * 0.5f) / ppt,</b>
+&nbsp;        (rectangle.y + rectangle.height * 0.5f) / ppt);
+<b class="fc">&nbsp;    polygon.setAsBox(rectangle.width * 0.5f / ppt,</b>
+&nbsp;        rectangle.height * 0.5f / ppt,
+&nbsp;        size,
+&nbsp;        0.0f);
+<b class="fc">&nbsp;    return polygon;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  protected static CircleShape getCircle(CircleMapObject circleObject) {
+<b class="fc">&nbsp;    Circle circle = circleObject.getCircle();</b>
+<b class="fc">&nbsp;    CircleShape circleShape = new CircleShape();</b>
+<b class="fc">&nbsp;    circleShape.setRadius(circle.radius / ppt);</b>
+<b class="fc">&nbsp;    circleShape.setPosition(new Vector2(circle.x / ppt, circle.y / ppt));</b>
+<b class="fc">&nbsp;    return circleShape;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  protected static PolygonShape getPolygon(PolygonMapObject polygonObject) {
+<b class="fc">&nbsp;    PolygonShape polygon = new PolygonShape();</b>
+<b class="fc">&nbsp;    float[] vertices = polygonObject.getPolygon().getTransformedVertices();</b>
+&nbsp;
+<b class="fc">&nbsp;    float[] worldVertices = new float[vertices.length];</b>
+&nbsp;
+<b class="fc">&nbsp;    for (int i = 0; i &lt; vertices.length; ++i) {</b>
+<b class="fc">&nbsp;      System.out.println(vertices[i]);</b>
+<b class="fc">&nbsp;      worldVertices[i] = vertices[i] / ppt;</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    polygon.set(worldVertices);</b>
+<b class="fc">&nbsp;    return polygon;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  protected static ChainShape getPolyline(PolylineMapObject polylineObject) {
+<b class="fc">&nbsp;    float[] vertices = polylineObject.getPolyline().getTransformedVertices();</b>
+<b class="fc">&nbsp;    Vector2[] worldVertices = new Vector2[vertices.length / 2];</b>
+&nbsp;
+<b class="fc">&nbsp;    for (int i = 0; i &lt; vertices.length / 2; ++i) {</b>
+<b class="fc">&nbsp;      worldVertices[i] = new Vector2();</b>
+<b class="fc">&nbsp;      worldVertices[i].x = vertices[i * 2] / ppt;</b>
+<b class="fc">&nbsp;      worldVertices[i].y = vertices[i * 2 + 1] / ppt;</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    ChainShape chain = new ChainShape();</b>
+<b class="fc">&nbsp;    chain.createChain(worldVertices);</b>
+<b class="fc">&nbsp;    return chain;</b>
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>

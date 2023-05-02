@@ -1,0 +1,220 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > WorldContactListener</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic.utility.box2d</a>
+</div>
+
+<h1>Coverage Summary for Class: WorldContactListener (com.devcharles.piazzapanic.utility.box2d)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WorldContactListener</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    14.3%
+  </span>
+  <span class="absValue">
+    (1/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    2.1%
+  </span>
+  <span class="absValue">
+    (1/48)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.devcharles.piazzapanic.utility.box2d;
+&nbsp;
+&nbsp;import com.badlogic.ashley.core.Entity;
+&nbsp;import com.badlogic.gdx.physics.box2d.Contact;
+&nbsp;import com.badlogic.gdx.physics.box2d.ContactImpulse;
+&nbsp;import com.badlogic.gdx.physics.box2d.ContactListener;
+&nbsp;import com.badlogic.gdx.physics.box2d.Manifold;
+&nbsp;import com.devcharles.piazzapanic.components.PlayerComponent;
+&nbsp;import com.devcharles.piazzapanic.components.StationComponent;
+&nbsp;import com.devcharles.piazzapanic.utility.Mappers;
+&nbsp;import com.devcharles.piazzapanic.utility.Pair;
+&nbsp;
+&nbsp;/**
+&nbsp; * Handles collision events, allows interactivity between the player and other objects.
+&nbsp; *
+&nbsp; * @author Andrey Samoilov
+&nbsp; */
+<b class="fc">&nbsp;public class WorldContactListener implements ContactListener {</b>
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void beginContact(Contact contact) {
+<b class="nc">&nbsp;    Pair&lt;StationComponent, Entity&gt; stationCook = stationInteractResolver(contact);</b>
+<b class="nc">&nbsp;    if (stationCook != null) {</b>
+<b class="nc">&nbsp;      stationCook.first.interactingCook = stationCook.second;</b>
+&nbsp;      return;
+&nbsp;    }
+&nbsp;
+<b class="nc">&nbsp;    Pair&lt;Entity, Entity&gt; customerCook = customerInteractResolver(contact);</b>
+<b class="nc">&nbsp;    if (customerCook != null) {</b>
+&nbsp;      // Gdx.app.log(&quot;Begin contact&quot;, &quot;Cook+Customer&quot;);
+<b class="nc">&nbsp;      Mappers.customer.get(customerCook.first).interactingCook = customerCook.second;</b>
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void endContact(Contact contact) {
+<b class="nc">&nbsp;    Pair&lt;StationComponent, Entity&gt; stationCook = stationInteractResolver(contact);</b>
+<b class="nc">&nbsp;    if (stationCook != null) {</b>
+<b class="nc">&nbsp;      stationCook.first.interactingCook = null;</b>
+&nbsp;      return;
+&nbsp;    }
+&nbsp;
+<b class="nc">&nbsp;    Pair&lt;Entity, Entity&gt; customerCook = customerInteractResolver(contact);</b>
+<b class="nc">&nbsp;    if (customerCook != null) {</b>
+&nbsp;      // Gdx.app.log(&quot;End contact&quot;, &quot;Cook+Customer&quot;);
+<b class="nc">&nbsp;      Mappers.customer.get(customerCook.first).interactingCook = null;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;  }
+&nbsp;
+&nbsp;  protected Pair&lt;StationComponent, Entity&gt; stationInteractResolver(Contact contact) {
+<b class="nc">&nbsp;    Object objA = contact.getFixtureA().getUserData();</b>
+<b class="nc">&nbsp;    Object objB = contact.getFixtureB().getUserData();</b>
+&nbsp;
+<b class="nc">&nbsp;    if (objA == null || objB == null) {</b>
+<b class="nc">&nbsp;      return null;</b>
+&nbsp;    }
+&nbsp;
+<b class="nc">&nbsp;    boolean objAStation = (StationComponent.class.isAssignableFrom(objA.getClass()));</b>
+<b class="nc">&nbsp;    boolean objBStation = (StationComponent.class.isAssignableFrom(objB.getClass()));</b>
+&nbsp;
+<b class="nc">&nbsp;    if (objAStation || objBStation) {</b>
+<b class="nc">&nbsp;      Object station = objAStation ? objA : objB;</b>
+<b class="nc">&nbsp;      Entity cook = station == objA ? ((Entity) objB) : ((Entity) objA);</b>
+&nbsp;
+<b class="nc">&nbsp;      PlayerComponent player = Mappers.player.get(cook);</b>
+&nbsp;
+<b class="nc">&nbsp;      if (player != null) {</b>
+<b class="nc">&nbsp;        player.putDown = false;</b>
+<b class="nc">&nbsp;        player.pickUp = false;</b>
+<b class="nc">&nbsp;        return new Pair&lt;&gt;((StationComponent) station, cook);</b>
+&nbsp;      }
+&nbsp;    }
+<b class="nc">&nbsp;    return null;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  protected Pair&lt;Entity, Entity&gt; customerInteractResolver(Contact contact) {
+<b class="nc">&nbsp;    Object objA = contact.getFixtureA().getUserData();</b>
+<b class="nc">&nbsp;    Object objB = contact.getFixtureB().getUserData();</b>
+&nbsp;
+<b class="nc">&nbsp;    if (objA == null || objB == null) {</b>
+<b class="nc">&nbsp;      return null;</b>
+&nbsp;    }
+&nbsp;
+<b class="nc">&nbsp;    boolean objAEntity = (Entity.class.isAssignableFrom(objA.getClass()));</b>
+<b class="nc">&nbsp;    boolean objBEntity = (Entity.class.isAssignableFrom(objB.getClass()));</b>
+&nbsp;
+<b class="nc">&nbsp;    if (!objAEntity || !objBEntity) {</b>
+<b class="nc">&nbsp;      return null;</b>
+&nbsp;    }
+&nbsp;
+<b class="nc">&nbsp;    Entity a = (Entity) objA;</b>
+<b class="nc">&nbsp;    Entity b = (Entity) objB;</b>
+&nbsp;
+<b class="nc">&nbsp;    if (Mappers.customer.has(a) || Mappers.customer.has(b)) {</b>
+<b class="nc">&nbsp;      Entity customer = Mappers.customer.has(a) ? a : b;</b>
+<b class="nc">&nbsp;      Entity cook = (customer == a) ? b : a;</b>
+&nbsp;
+<b class="nc">&nbsp;      PlayerComponent player = Mappers.player.get(cook);</b>
+&nbsp;
+<b class="nc">&nbsp;      if (player != null) {</b>
+<b class="nc">&nbsp;        player.putDown = false;</b>
+<b class="nc">&nbsp;        return new Pair&lt;&gt;(customer, cook);</b>
+&nbsp;      }
+&nbsp;    }
+<b class="nc">&nbsp;    return null;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void preSolve(Contact contact, Manifold oldManifold) {
+<b class="nc">&nbsp;  }</b>
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void postSolve(Contact contact, ContactImpulse impulse) {
+<b class="nc">&nbsp;  }</b>
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>

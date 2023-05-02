@@ -1,0 +1,200 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > CookAnimator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic.utility</a>
+</div>
+
+<h1>Coverage Summary for Class: CookAnimator (com.devcharles.piazzapanic.utility)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">CookAnimator</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    36.4%
+  </span>
+  <span class="absValue">
+    (8/22)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">CookAnimator$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    33.3%
+  </span>
+  <span class="absValue">
+    (1/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    34.8%
+  </span>
+  <span class="absValue">
+    (8/23)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.devcharles.piazzapanic.utility;
+&nbsp;
+&nbsp;import com.badlogic.gdx.assets.AssetManager;
+&nbsp;import java.util.concurrent.ThreadLocalRandom;
+&nbsp;
+&nbsp;import com.badlogic.gdx.graphics.Texture;
+&nbsp;
+&nbsp;import com.badlogic.gdx.graphics.g2d.Animation;
+&nbsp;import com.badlogic.gdx.graphics.g2d.TextureRegion;
+&nbsp;
+&nbsp;/**
+&nbsp; * Animations specific to the cooks.
+&nbsp; *
+&nbsp; * @author Andrey Samoilov
+&nbsp; * @author Alistair Foggin
+&nbsp; */
+&nbsp;public class CookAnimator extends WalkAnimator {
+&nbsp;
+<b class="fc">&nbsp;  CookAnimator(AssetManager assetManager) {</b>
+<b class="fc">&nbsp;    int randomNum = ThreadLocalRandom.current().nextInt(1, 3);</b>
+&nbsp;
+&nbsp;    // Load the sprite sheet as a Texture
+<b class="fc">&nbsp;    Texture walkSheet = assetManager.get(&quot;v2/chef/&quot; + randomNum + &quot;.png&quot;, Texture.class);</b>
+<b class="fc">&nbsp;    Texture holdOneSheet = assetManager.get(&quot;v2/chef/&quot; + randomNum + &quot;_holding.png&quot;, Texture.class);</b>
+<b class="fc">&nbsp;    Texture holdManySheet = assetManager.get(&quot;v2/chef/&quot; + randomNum + &quot;_crate.png&quot;, Texture.class);</b>
+&nbsp;
+<b class="fc">&nbsp;    addTextures(walkSheet, 0);</b>
+<b class="fc">&nbsp;    addTextures(holdOneSheet, 1);</b>
+<b class="fc">&nbsp;    addTextures(holdManySheet, 2);</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /*
+&nbsp;   * (non-Javadoc)
+&nbsp;   *
+&nbsp;   * @see com.devcharles.piazzapanic.utility.WalkAnimator#getFrame(float, boolean,
+&nbsp;   * float)
+&nbsp;   */
+&nbsp;  @Override
+&nbsp;  public TextureRegion getFrame(float rotation, boolean isMoving, float frameTime, int holding) {
+&nbsp;
+&nbsp;    // holding &gt; 1 -&gt; 2
+&nbsp;    // holding == 1 -&gt; 1
+&nbsp;    // 0 otherwise
+<b class="nc">&nbsp;    int index = holding &gt; 1 ? 2 : (holding == 1 ? 1 : 0);</b>
+&nbsp;
+<b class="nc">&nbsp;    Animation&lt;TextureRegion&gt; currentAnimation = walkDown.get(index);</b>
+&nbsp;
+<b class="nc">&nbsp;    if (!isMoving) {</b>
+<b class="nc">&nbsp;      frameTime = 0;</b>
+&nbsp;    }
+&nbsp;
+<b class="nc">&nbsp;    Direction dir = rotationToDirection(rotation);</b>
+&nbsp;
+<b class="nc">&nbsp;    switch (dir) {</b>
+&nbsp;      case up:
+<b class="nc">&nbsp;        currentAnimation = walkUp.get(index);</b>
+<b class="nc">&nbsp;        break;</b>
+&nbsp;      case down:
+<b class="nc">&nbsp;        currentAnimation = walkDown.get(index);</b>
+<b class="nc">&nbsp;        break;</b>
+&nbsp;      case left:
+<b class="nc">&nbsp;        currentAnimation = walkLeft.get(index);</b>
+<b class="nc">&nbsp;        break;</b>
+&nbsp;      case right:
+<b class="nc">&nbsp;        currentAnimation = walkRight.get(index);</b>
+&nbsp;        break;
+&nbsp;    }
+&nbsp;
+<b class="nc">&nbsp;    return currentAnimation.getKeyFrame(frameTime, true);</b>
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>

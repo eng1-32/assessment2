@@ -1,0 +1,189 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > GdxTimer</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic.utility</a>
+</div>
+
+<h1>Coverage Summary for Class: GdxTimer (com.devcharles.piazzapanic.utility)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GdxTimer</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (19/19)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;// Simple timer by @tedigc
+&nbsp;// https://gist.github.com/tedigc/fe28616706025b00c6c540af4d03c827
+&nbsp;
+&nbsp;package com.devcharles.piazzapanic.utility;
+&nbsp;
+&nbsp;/**
+&nbsp; * Simple timer class suitable for this project. Modified for this project.
+&nbsp; *
+&nbsp; * @author tedigc
+&nbsp; */
+&nbsp;public class GdxTimer {
+&nbsp;
+&nbsp;  private int delay;
+&nbsp;
+&nbsp;  private int elapsed;
+&nbsp;  private boolean running;
+&nbsp;  private final boolean looping;
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Create a timer.
+&nbsp;   *
+&nbsp;   * @param delay   delay in milliseconds.
+&nbsp;   * @param running whether the timer is running when it&#39;s created
+&nbsp;   * @param looping does the timer restart itself after elapsing.
+&nbsp;   */
+<b class="fc">&nbsp;  public GdxTimer(int delay, boolean running, boolean looping) {</b>
+<b class="fc">&nbsp;    this.delay = delay;</b>
+<b class="fc">&nbsp;    this.running = running;</b>
+<b class="fc">&nbsp;    this.looping = looping;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Progress the timer
+&nbsp;   *
+&nbsp;   * @param delta time since last frame.
+&nbsp;   * @return Whether the timer is finished.
+&nbsp;   */
+&nbsp;  public boolean tick(float delta) {
+<b class="fc">&nbsp;    if (running) {</b>
+<b class="fc">&nbsp;      elapsed += delta * 1000;</b>
+<b class="fc">&nbsp;      if (elapsed &gt; delay) {</b>
+<b class="fc">&nbsp;        elapsed -= looping ? delay : 0;</b>
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;      }
+&nbsp;    }
+<b class="fc">&nbsp;    return false;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void start() {
+<b class="fc">&nbsp;    this.running = true;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void stop() {
+<b class="fc">&nbsp;    this.running = false;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Reset the timer. This does not stop it, for that use {@code GdxTimer.stop()}
+&nbsp;   */
+&nbsp;  public void reset() {
+<b class="fc">&nbsp;    this.elapsed = 0;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void setElapsed(int elapsed) {
+<b class="fc">&nbsp;    this.elapsed = elapsed;</b>
+&nbsp;  }
+&nbsp;  public int getElapsed() {
+<b class="fc">&nbsp;    return elapsed;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public boolean isRunning() {
+<b class="fc">&nbsp;    return running;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public void setDelay(int delay) {
+<b class="fc">&nbsp;    this.delay = delay;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public int getDelay() {
+<b class="fc">&nbsp;    return delay;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public boolean isLooping() {
+<b class="fc">&nbsp;    return looping;</b>
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,152 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > StationComponent</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic.components</a>
+</div>
+
+<h1>Coverage Summary for Class: StationComponent (com.devcharles.piazzapanic.components)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">StationComponent</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    47.1%
+  </span>
+  <span class="absValue">
+    (8/17)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.devcharles.piazzapanic.components;
+&nbsp;
+&nbsp;import com.badlogic.ashley.core.Engine;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;
+&nbsp;import com.badlogic.ashley.core.Component;
+&nbsp;import com.badlogic.ashley.core.Entity;
+&nbsp;import com.devcharles.piazzapanic.components.FoodComponent.FoodType;
+&nbsp;import com.devcharles.piazzapanic.utility.Station.StationType;
+&nbsp;
+&nbsp;/**
+&nbsp; * @author Andrey Samoilov
+&nbsp; * @author Ross Holmes
+&nbsp; * @author Alistair Foggin
+&nbsp; */
+<b class="fc">&nbsp;public class StationComponent implements Component {</b>
+&nbsp;
+<b class="fc">&nbsp;  public int id = 0;</b>
+<b class="fc">&nbsp;  public float prepModifier = 1f;</b>
+<b class="fc">&nbsp;  public float chopModifier = 1f;</b>
+<b class="fc">&nbsp;  public Entity interactingCook = null;</b>
+&nbsp;  public StationType type;
+<b class="fc">&nbsp;  public ArrayList&lt;Entity&gt; food = new ArrayList&lt;&gt;(</b>
+<b class="fc">&nbsp;      Arrays.asList(new Entity[]{null, null, null, null}));</b>
+<b class="fc">&nbsp;  public FoodType ingredient = null;</b>
+&nbsp;  public Boolean isLocked;
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Copy values from another station component into this one
+&nbsp;   *
+&nbsp;   * @param otherStation the station to copy the parameters from
+&nbsp;   * @param engine       the engine that contains the entities within this component
+&nbsp;   * @author Alistair Foggin
+&nbsp;   */
+&nbsp;  public void copyValues(StationComponent otherStation, Engine engine) {
+<b class="nc">&nbsp;    id = otherStation.id;</b>
+<b class="nc">&nbsp;    interactingCook = otherStation.interactingCook;</b>
+<b class="nc">&nbsp;    type = otherStation.type;</b>
+<b class="nc">&nbsp;    for (int i = 0; i &lt; food.size(); i++) {</b>
+<b class="nc">&nbsp;      Entity foodEntity = food.get(i);</b>
+<b class="nc">&nbsp;      if (foodEntity != null) {</b>
+<b class="nc">&nbsp;        engine.removeEntity(foodEntity);</b>
+&nbsp;      }
+<b class="nc">&nbsp;      food.set(i, otherStation.food.get(i));</b>
+&nbsp;    }
+<b class="nc">&nbsp;    ingredient = otherStation.ingredient;</b>
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>

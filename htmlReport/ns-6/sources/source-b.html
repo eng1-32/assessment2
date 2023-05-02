@@ -1,0 +1,277 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > WalkAnimator</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic.utility</a>
+</div>
+
+<h1>Coverage Summary for Class: WalkAnimator (com.devcharles.piazzapanic.utility)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">WalkAnimator</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (33/33)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">WalkAnimator$1</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">WalkAnimator$Direction</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (47/47)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.devcharles.piazzapanic.utility;
+&nbsp;
+&nbsp;import java.util.ArrayList;
+&nbsp;import java.util.Arrays;
+&nbsp;import java.util.HashMap;
+&nbsp;
+&nbsp;import com.badlogic.gdx.graphics.Texture;
+&nbsp;import com.badlogic.gdx.graphics.g2d.Animation;
+&nbsp;import com.badlogic.gdx.graphics.g2d.TextureRegion;
+&nbsp;
+&nbsp;/**
+&nbsp; * Abstract class that helps with setting up animations for characters in the game. To use,
+&nbsp; * initialise  each directional animation.
+&nbsp; *
+&nbsp; * @author Andrey Samoilov
+&nbsp; */
+<b class="fc">&nbsp;public abstract class WalkAnimator {</b>
+&nbsp;
+<b class="fc">&nbsp;  protected ArrayList&lt;Animation&lt;TextureRegion&gt;&gt; walkRight = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;  protected ArrayList&lt;Animation&lt;TextureRegion&gt;&gt; walkLeft = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;  protected ArrayList&lt;Animation&lt;TextureRegion&gt;&gt; walkUp = new ArrayList&lt;&gt;();</b>
+<b class="fc">&nbsp;  protected ArrayList&lt;Animation&lt;TextureRegion&gt;&gt; walkDown = new ArrayList&lt;&gt;();</b>
+&nbsp;
+&nbsp;  /**
+&nbsp;   * All directions that the animations support.
+&nbsp;   */
+<b class="fc">&nbsp;  public enum Direction {</b>
+<b class="fc">&nbsp;    left,</b>
+<b class="fc">&nbsp;    right,</b>
+<b class="fc">&nbsp;    up,</b>
+<b class="fc">&nbsp;    down</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Tuple Representing the dimensions of the spritesheet to be used. The values represent columns
+&nbsp;   * and rows, respectively.
+&nbsp;   */
+<b class="fc">&nbsp;  private static final Pair&lt;Integer, Integer&gt; dimensions = new Pair&lt;&gt;(10, 1);</b>
+&nbsp;
+&nbsp;  /**
+&nbsp;   * @param rotation  box2d body rotation
+&nbsp;   * @param isMoving  whether the entity is moving or not
+&nbsp;   * @param frameTime elapsed time for the animation
+&nbsp;   * @param holding   how many items the character is holding
+&nbsp;   * @return A texture region to draw, and a rotation used for rendering the region.
+&nbsp;   */
+&nbsp;  public abstract TextureRegion getFrame(float rotation, boolean isMoving, float frameTime,
+&nbsp;      int holding);
+&nbsp;
+<b class="fc">&nbsp;  private static final HashMap&lt;Integer, Direction&gt; directionMap = new HashMap&lt;Integer, Direction&gt;() {</b>
+&nbsp;    {
+<b class="fc">&nbsp;      put(0, Direction.right);</b>
+<b class="fc">&nbsp;      put(45, Direction.up);</b>
+<b class="fc">&nbsp;      put(-45, Direction.down);</b>
+<b class="fc">&nbsp;      put(90, Direction.up);</b>
+<b class="fc">&nbsp;      put(-90, Direction.down);</b>
+<b class="fc">&nbsp;      put(135, Direction.up);</b>
+<b class="fc">&nbsp;      put(-135, Direction.down);</b>
+<b class="fc">&nbsp;      put(180, Direction.left);</b>
+&nbsp;    }
+&nbsp;  };
+&nbsp;
+<b class="fc">&nbsp;  private static final int[] directions = {-135, -90, -45, 0, 45, 90, 135, 180};</b>
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Approximate the Box2D rotation to the nearest mapped value.
+&nbsp;   *
+&nbsp;   * @param rotation body rotation in degrees.
+&nbsp;   * @return {@link Direction} the character should be facing in.
+&nbsp;   */
+&nbsp;  public static Direction rotationToDirection(float rotation) {
+&nbsp;
+<b class="fc">&nbsp;    int orientation = Math.round(rotation);</b>
+&nbsp;
+&nbsp;    // Find closest mapped integer value in directions
+<b class="fc">&nbsp;    int minDistance = Math.abs(directions[0] - orientation);</b>
+&nbsp;
+<b class="fc">&nbsp;    int index = 0;</b>
+<b class="fc">&nbsp;    for (int i = 0; i &lt; directions.length; i++) {</b>
+<b class="fc">&nbsp;      int currentDistance = Math.abs(directions[i] - orientation);</b>
+&nbsp;
+<b class="fc">&nbsp;      if (currentDistance &lt; minDistance) {</b>
+<b class="fc">&nbsp;        index = i;</b>
+<b class="fc">&nbsp;        minDistance = currentDistance;</b>
+&nbsp;      }
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    rotation = directions[index];</b>
+&nbsp;
+<b class="fc">&nbsp;    return directionMap.get(Math.round(rotation));</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Generate Animations from a {@link Texture}, override this if you want to parse the texture
+&nbsp;   * spritesheet differently.
+&nbsp;   *
+&nbsp;   * @param currentSheet The {@link Texture} containing all the frames of the animation.
+&nbsp;   * @param variant        Variant of the spritesheet (0 -&gt; walk, 1 -&gt; hold one item, 2 -&gt; hold
+&nbsp;   *                     crate)
+&nbsp;   */
+&nbsp;  protected void addTextures(Texture currentSheet, int variant) {
+&nbsp;    // Split the spritesheet into separate textureregions
+<b class="fc">&nbsp;    TextureRegion[][] tmp = TextureRegion.split(currentSheet, 32, 32);</b>
+&nbsp;
+&nbsp;    // Flatten the array
+<b class="fc">&nbsp;    TextureRegion[] frames = new TextureRegion[dimensions.first * dimensions.second];</b>
+<b class="fc">&nbsp;    int index = 0;</b>
+<b class="fc">&nbsp;    for (int i = 0; i &lt; dimensions.second; i++) {</b>
+<b class="fc">&nbsp;      for (int j = 0; j &lt; dimensions.first; j++) {</b>
+<b class="fc">&nbsp;        frames[index++] = tmp[i][j];</b>
+&nbsp;      }
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    walkDown.add(new Animation&lt;&gt;(0.1f, Arrays.copyOfRange(frames, 0, 3)));</b>
+<b class="fc">&nbsp;    walkUp.add(new Animation&lt;&gt;(0.1f, Arrays.copyOfRange(frames, 3, 6)));</b>
+<b class="fc">&nbsp;    walkRight.add(new Animation&lt;&gt;(0.1f, Arrays.copyOfRange(frames, 6, 10)));</b>
+&nbsp;
+&nbsp;    // Create the left animation by copying and flipping textures.
+<b class="fc">&nbsp;    TextureRegion[] toCopy = walkRight.get(variant).getKeyFrames();</b>
+<b class="fc">&nbsp;    TextureRegion[] flippedRegions = new TextureRegion[toCopy.length];</b>
+&nbsp;
+<b class="fc">&nbsp;    for (int i = 0; i &lt; flippedRegions.length; i++) {</b>
+<b class="fc">&nbsp;      flippedRegions[i] = new TextureRegion(toCopy[i]);</b>
+<b class="fc">&nbsp;      flippedRegions[i].flip(true, false);</b>
+&nbsp;    }
+&nbsp;
+<b class="fc">&nbsp;    walkLeft.add(new Animation&lt;&gt;(0.1f, flippedRegions));</b>
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>

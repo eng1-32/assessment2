@@ -1,0 +1,244 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > EndlessGameScreen</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic</a>
+</div>
+
+<h1>Coverage Summary for Class: EndlessGameScreen (com.devcharles.piazzapanic)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EndlessGameScreen</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/64)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.devcharles.piazzapanic;
+&nbsp;
+&nbsp;import com.badlogic.ashley.core.Entity;
+&nbsp;import com.badlogic.gdx.Gdx;
+&nbsp;import com.badlogic.gdx.files.FileHandle;
+&nbsp;import com.badlogic.gdx.math.Vector2;
+&nbsp;import com.badlogic.gdx.utils.Json;
+&nbsp;import com.devcharles.piazzapanic.components.ControllableComponent;
+&nbsp;import com.devcharles.piazzapanic.components.ItemComponent;
+&nbsp;import com.devcharles.piazzapanic.components.PlayerComponent;
+&nbsp;import com.devcharles.piazzapanic.componentsystems.CarryItemsSystem;
+&nbsp;import com.devcharles.piazzapanic.componentsystems.CustomerAISystem;
+&nbsp;import com.devcharles.piazzapanic.componentsystems.InventoryUpdateSystem;
+&nbsp;import com.devcharles.piazzapanic.componentsystems.LightingSystem;
+&nbsp;import com.devcharles.piazzapanic.componentsystems.PhysicsSystem;
+&nbsp;import com.devcharles.piazzapanic.componentsystems.PlayerControlSystem;
+&nbsp;import com.devcharles.piazzapanic.componentsystems.PowerUpSystem;
+&nbsp;import com.devcharles.piazzapanic.componentsystems.RenderingSystem;
+&nbsp;import com.devcharles.piazzapanic.componentsystems.StationSystem;
+&nbsp;import com.devcharles.piazzapanic.utility.Difficulty;
+&nbsp;import com.devcharles.piazzapanic.utility.Difficulty.Level;
+&nbsp;import com.devcharles.piazzapanic.utility.Mappers;
+&nbsp;import com.devcharles.piazzapanic.utility.saving.GameState;
+&nbsp;import com.devcharles.piazzapanic.utility.saving.SavableCook;
+&nbsp;import com.devcharles.piazzapanic.utility.saving.SavableFood;
+&nbsp;
+&nbsp;/**
+&nbsp; * @author Alistair Foggin
+&nbsp; */
+&nbsp;public class EndlessGameScreen extends BaseGameScreen {
+&nbsp;
+&nbsp;  private Difficulty difficulty;
+&nbsp;
+&nbsp;  public EndlessGameScreen(PiazzaPanic game, String mapPath, boolean loadSave,
+&nbsp;      Difficulty difficulty) {
+<b class="nc">&nbsp;    super(game, mapPath);</b>
+<b class="nc">&nbsp;    hud.setEndless(true);</b>
+<b class="nc">&nbsp;    engine.addSystem(new PhysicsSystem(world));</b>
+<b class="nc">&nbsp;    engine.addSystem(new RenderingSystem(mapLoader.map, game.batch, camera));</b>
+<b class="nc">&nbsp;    engine.addSystem(new LightingSystem(rayhandler, camera));</b>
+&nbsp;    // This can be commented in during debugging.
+&nbsp;    // engine.addSystem(new DebugRendererSystem(world, camera));
+<b class="nc">&nbsp;    engine.addSystem(new PlayerControlSystem(kbInput));</b>
+<b class="nc">&nbsp;    engine.addSystem(new StationSystem(factory, reputationPointsAndMoney, hud));</b>
+<b class="nc">&nbsp;    CustomerAISystem aiSystem =</b>
+<b class="nc">&nbsp;        new CustomerAISystem(mapLoader.getObjectives(), world, factory, hud,</b>
+&nbsp;            reputationPointsAndMoney,
+&nbsp;            true);
+<b class="nc">&nbsp;    engine.addSystem(aiSystem);</b>
+<b class="nc">&nbsp;    engine.addSystem(new CarryItemsSystem());</b>
+<b class="nc">&nbsp;    engine.addSystem(new InventoryUpdateSystem(hud));</b>
+<b class="nc">&nbsp;    PowerUpSystem powerUpSystem = new PowerUpSystem();</b>
+<b class="nc">&nbsp;    engine.addSystem(powerUpSystem);</b>
+<b class="nc">&nbsp;    hud.initShop(powerUpSystem);</b>
+&nbsp;
+<b class="nc">&nbsp;    this.difficulty = difficulty;</b>
+&nbsp;
+<b class="nc">&nbsp;    if (loadSave) {</b>
+<b class="nc">&nbsp;      FileHandle saveFile = Gdx.files.local(GameState.SAVE_LOCATION);</b>
+<b class="nc">&nbsp;      Json json = new Json();</b>
+<b class="nc">&nbsp;      GameState gameSave = json.fromJson(GameState.class, saveFile.readString());</b>
+&nbsp;
+&nbsp;      // Load stations
+<b class="nc">&nbsp;      for (String key : gameSave.getStations().keySet()) {</b>
+<b class="nc">&nbsp;        Mappers.station.get(stationsMap.get(Integer.valueOf(key)))</b>
+<b class="nc">&nbsp;            .copyValues(gameSave.getStations().get(key).toStationComponent(factory), engine);</b>
+<b class="nc">&nbsp;      }</b>
+&nbsp;
+&nbsp;      // Load cooks
+<b class="nc">&nbsp;      for (int i = 0; i &lt; gameSave.getCooks().size(); i++) {</b>
+<b class="nc">&nbsp;        mapLoader.getCookSpawns().remove(i);</b>
+<b class="nc">&nbsp;        SavableCook savedCook = gameSave.getCooks().get(i);</b>
+<b class="nc">&nbsp;        Entity cook = factory.createCook((int) savedCook.transformComponent.position.x,</b>
+&nbsp;            (int) savedCook.transformComponent.position.y);
+&nbsp;
+<b class="nc">&nbsp;        ControllableComponent controllableComponent = Mappers.controllable.get(cook);</b>
+<b class="nc">&nbsp;        for (SavableFood savableFood : gameSave.getCooks().get(i).foodStack) {</b>
+<b class="nc">&nbsp;          Entity foodEntity = savableFood.toEntity(factory);</b>
+<b class="nc">&nbsp;          ItemComponent itemComponent = engine.createComponent(ItemComponent.class);</b>
+<b class="nc">&nbsp;          itemComponent.holderTransform = Mappers.transform.get(cook);</b>
+<b class="nc">&nbsp;          foodEntity.add(itemComponent);</b>
+<b class="nc">&nbsp;          controllableComponent.currentFood.push(foodEntity);</b>
+<b class="nc">&nbsp;        }</b>
+<b class="nc">&nbsp;        controllableComponent.speedModifier = savedCook.speedModifier;</b>
+<b class="nc">&nbsp;        if (i == 0) {</b>
+<b class="nc">&nbsp;          cook.add(engine.createComponent(PlayerComponent.class));</b>
+&nbsp;        }
+&nbsp;      }
+&nbsp;
+<b class="nc">&nbsp;      reputationPointsAndMoney[0] = gameSave.getReputation();</b>
+<b class="nc">&nbsp;      reputationPointsAndMoney[1] = gameSave.getMoney();</b>
+&nbsp;
+&nbsp;      // Load customerAISystem
+<b class="nc">&nbsp;      aiSystem.loadFromSave(gameSave.getCustomerAISystem());</b>
+&nbsp;
+&nbsp;      // Load powerUpSystem
+<b class="nc">&nbsp;      powerUpSystem.loadFromSave(gameSave.getPowerUpSystem());</b>
+&nbsp;
+&nbsp;      // Load difficulty
+<b class="nc">&nbsp;      this.difficulty = gameSave.getDifficulty();</b>
+&nbsp;
+&nbsp;      // Load hud save details
+<b class="nc">&nbsp;      hud.loadFromSave(gameSave);</b>
+&nbsp;    }
+&nbsp;
+<b class="nc">&nbsp;    if (this.difficulty == null) {</b>
+<b class="nc">&nbsp;      this.difficulty = Difficulty.createDifficulty(Level.MEDIUM);</b>
+&nbsp;    }
+<b class="nc">&nbsp;    aiSystem.setDifficulty(this.difficulty);</b>
+&nbsp;
+<b class="nc">&nbsp;    if (!loadSave) {</b>
+<b class="nc">&nbsp;      for (int i = 0; i &lt; this.difficulty.initialCooks; i++) {</b>
+<b class="nc">&nbsp;        Vector2 position = mapLoader.getCookSpawns().get(i);</b>
+<b class="nc">&nbsp;        Entity cook = factory.createCook((int) position.x, (int) position.y);</b>
+<b class="nc">&nbsp;        if (i == 0) {</b>
+<b class="nc">&nbsp;          cook.add(getEngine().createComponent(PlayerComponent.class));</b>
+&nbsp;        }
+<b class="nc">&nbsp;        mapLoader.getCookSpawns().remove(i);</b>
+&nbsp;      }
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  public void spawnCook() {
+<b class="nc">&nbsp;    int id = -1;</b>
+<b class="nc">&nbsp;    for (Integer i : mapLoader.getCookSpawns().keySet()) {</b>
+<b class="nc">&nbsp;      id = i;</b>
+<b class="nc">&nbsp;      Vector2 position = mapLoader.getCookSpawns().get(i);</b>
+<b class="nc">&nbsp;      factory.createCook((int) position.x, (int) position.y);</b>
+<b class="nc">&nbsp;      break;</b>
+&nbsp;    }
+<b class="nc">&nbsp;    mapLoader.getCookSpawns().remove(id);</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public boolean canSpawnCook() {
+<b class="nc">&nbsp;    return mapLoader.getCookSpawns().size() &gt; 0;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  public Difficulty getDifficulty() {
+<b class="nc">&nbsp;    return difficulty;</b>
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>

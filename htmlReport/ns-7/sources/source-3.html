@@ -1,0 +1,275 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <title>Coverage Report > Box2dSquareAABBProximity</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.devcharles.piazzapanic.utility.box2d</a>
+</div>
+
+<h1>Coverage Summary for Class: Box2dSquareAABBProximity (com.devcharles.piazzapanic.utility.box2d)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Box2dSquareAABBProximity</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97.1%
+  </span>
+  <span class="absValue">
+    (34/35)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">Box2dSquareAABBProximity$AABB</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    97.2%
+  </span>
+  <span class="absValue">
+    (35/36)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;/*******************************************************************************
+&nbsp; * Copyright 2014 davebaol https://github.com/davebaol
+&nbsp; * Modifications copyright (C) 2023 Alistair Foggin
+&nbsp; *
+&nbsp; * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
+&nbsp; * you may not use this file except in compliance with the License.
+&nbsp; * You may obtain a copy of the License at
+&nbsp; *
+&nbsp; *   http://www.apache.org/licenses/LICENSE-2.0
+&nbsp; *
+&nbsp; * Unless required by applicable law or agreed to in writing, software
+&nbsp; * distributed under the License is distributed on an &quot;AS IS&quot; BASIS,
+&nbsp; * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+&nbsp; * See the License for the specific language governing permissions and
+&nbsp; * limitations under the License.
+&nbsp; ******************************************************************************/
+&nbsp;
+&nbsp;/*
+&nbsp; * The reportFixture() method was modified from the original to check for a null in the input.
+&nbsp; */
+&nbsp;
+&nbsp;package com.devcharles.piazzapanic.utility.box2d;
+&nbsp;
+&nbsp;import com.badlogic.gdx.ai.steer.Proximity;
+&nbsp;import com.badlogic.gdx.ai.steer.Steerable;
+&nbsp;import com.badlogic.gdx.math.Vector2;
+&nbsp;import com.badlogic.gdx.physics.box2d.Fixture;
+&nbsp;import com.badlogic.gdx.physics.box2d.QueryCallback;
+&nbsp;import com.badlogic.gdx.physics.box2d.World;
+&nbsp;
+&nbsp;/**
+&nbsp; * A {@code Box2dSquareAABBProximity} is a {@link Proximity} that queries the world for all fixtures
+&nbsp; * that potentially overlap the square AABB built around the circle having the specified detection
+&nbsp; * radius and whose center is the owner position.
+&nbsp; *
+&nbsp; * @author davebaol
+&nbsp; */
+&nbsp;public class Box2dSquareAABBProximity implements Proximity&lt;Vector2&gt;, QueryCallback {
+&nbsp;
+&nbsp;  protected Steerable&lt;Vector2&gt; owner;
+&nbsp;  protected World world;
+&nbsp;  protected ProximityCallback&lt;Vector2&gt; behaviorCallback;
+&nbsp;  protected float detectionRadius;
+&nbsp;
+&nbsp;  private int neighborCount;
+&nbsp;
+<b class="fc">&nbsp;  private static final AABB aabb = new AABB();</b>
+&nbsp;
+<b class="fc">&nbsp;  public Box2dSquareAABBProximity(Steerable&lt;Vector2&gt; owner, World world, float detectionRadius) {</b>
+<b class="fc">&nbsp;    this.owner = owner;</b>
+<b class="fc">&nbsp;    this.world = world;</b>
+<b class="fc">&nbsp;    this.detectionRadius = detectionRadius;</b>
+<b class="fc">&nbsp;    this.behaviorCallback = null;</b>
+<b class="fc">&nbsp;    this.neighborCount = 0;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public Steerable&lt;Vector2&gt; getOwner() {
+<b class="fc">&nbsp;    return owner;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public void setOwner(Steerable&lt;Vector2&gt; owner) {
+<b class="fc">&nbsp;    this.owner = owner;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Returns the box2d world.
+&nbsp;   */
+&nbsp;  public World getWorld() {
+<b class="fc">&nbsp;    return world;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Sets the box2d world.
+&nbsp;   */
+&nbsp;  public void setWorld(World world) {
+<b class="fc">&nbsp;    this.world = world;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Returns the detection radius that is half the side of the square AABB.
+&nbsp;   */
+&nbsp;  public float getDetectionRadius() {
+<b class="fc">&nbsp;    return detectionRadius;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  /**
+&nbsp;   * Sets the detection radius that is half the side of the square AABB.
+&nbsp;   */
+&nbsp;  public void setDetectionRadius(float detectionRadius) {
+<b class="fc">&nbsp;    this.detectionRadius = detectionRadius;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public int findNeighbors(ProximityCallback&lt;Vector2&gt; behaviorCallback) {
+<b class="fc">&nbsp;    this.behaviorCallback = behaviorCallback;</b>
+<b class="fc">&nbsp;    neighborCount = 0;</b>
+<b class="fc">&nbsp;    prepareAABB(aabb);</b>
+<b class="fc">&nbsp;    world.QueryAABB(this, aabb.lowerX, aabb.lowerY, aabb.upperX, aabb.upperY);</b>
+<b class="fc">&nbsp;    this.behaviorCallback = null;</b>
+<b class="fc">&nbsp;    return neighborCount;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  protected void prepareAABB(AABB aabb) {
+<b class="fc">&nbsp;    Vector2 position = owner.getPosition();</b>
+<b class="fc">&nbsp;    aabb.lowerX = position.x - detectionRadius;</b>
+<b class="fc">&nbsp;    aabb.lowerY = position.y - detectionRadius;</b>
+<b class="fc">&nbsp;    aabb.upperX = position.x + detectionRadius;</b>
+<b class="fc">&nbsp;    aabb.upperY = position.y + detectionRadius;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  protected Steerable&lt;Vector2&gt; getSteerable(Fixture fixture) {
+<b class="fc">&nbsp;    if (fixture.getBody().getUserData() instanceof Box2dSteeringBody) {</b>
+<b class="fc">&nbsp;      return (Box2dSteeringBody) fixture.getBody().getUserData();</b>
+&nbsp;    } else {
+<b class="nc">&nbsp;      return null;</b>
+&nbsp;    }
+&nbsp;  }
+&nbsp;
+&nbsp;  protected boolean accept(Steerable&lt;Vector2&gt; steerable) {
+<b class="fc">&nbsp;    return true;</b>
+&nbsp;  }
+&nbsp;
+&nbsp;  @Override
+&nbsp;  public boolean reportFixture(Fixture fixture) {
+<b class="fc">&nbsp;    Steerable&lt;Vector2&gt; steerable = getSteerable(fixture);</b>
+<b class="fc">&nbsp;    if (steerable == null) {</b>
+<b class="fc">&nbsp;      return false;</b>
+&nbsp;    }
+<b class="fc">&nbsp;    if (steerable != owner &amp;&amp; accept(steerable)) {</b>
+<b class="fc">&nbsp;      if (behaviorCallback.reportNeighbor(steerable)) {</b>
+<b class="fc">&nbsp;        neighborCount++;</b>
+&nbsp;      }
+&nbsp;    }
+<b class="fc">&nbsp;    return true;</b>
+&nbsp;  }
+&nbsp;
+<b class="fc">&nbsp;  public static class AABB {</b>
+&nbsp;
+&nbsp;    float lowerX;
+&nbsp;    float lowerY;
+&nbsp;    float upperX;
+&nbsp;    float upperY;
+&nbsp;  }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2023-05-02 18:43</div>
+</div>
+</body>
+</html>
